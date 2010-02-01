@@ -1,0 +1,23 @@
+RUNIT TEST PROTOCOL -- Mon Feb  1 21:16:22 2010 
+*********************************************** 
+Number of test functions: 2 
+Number of errors: 0 
+Number of failures: 0 
+
+ 
+1 Test Suite : 
+RProtoBuf unit testing - 2 test functions, 0 errors, 0 failures
+
+
+
+Details 
+*************************** 
+Test Suite: RProtoBuf unit testing 
+Test function regexp: ^test.+ 
+Test file regexp: ^runit.+\.[rR]$ 
+Involved directory: 
+/tmp/Rinst2604142038/RProtoBuf/unitTests 
+--------------------------- 
+Test file: /tmp/Rinst2604142038/RProtoBuf/unitTests/runit.golden.message.R 
+test.import: (5 checks) ... OK (0 seconds)
+test.readProtoFile: (61 checks) ... OK (0.01 seconds)

@@ -1,0 +1,21 @@
+\documentclass[10pt]{article}
+%\VignetteIndexEntry{Rcpp-unitTests}
+\usepackage{vmargin}
+\setmargrb{0.75in}{0.75in}{0.75in}{0.75in}
+
+\usepackage[colorlinks]{hyperref}
+\author{Romain Fran\c{c}ois \and Dirk Eddelbuettel}
+\title{RProtoBuf : Unit testing results}
+\begin{document}
+\maketitle
+
+\begin{verbatim}
+<<echo=FALSE,results=tex>>=
+results <- "unitTests-results/RProtoBuf-unitTests.txt"
+if( file.exists( results ) ){
+	writeLines( readLines( results ) )
+}
+@
+\end{verbatim}
+
+\end{document}
