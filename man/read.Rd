@@ -19,7 +19,7 @@
 \keyword{methods}
 \examples{
 # example file that contains a "tutorial.AddressBook" message
-book <- system.file( "examples", "AddressBookFile", package = "RProtoBuf" )
+book <- system.file( "examples", "addressbook.pb", package = "RProtoBuf" )
 
 # read the message
 message <- read( tutorial.AddressBook, book )
@@ -35,7 +35,7 @@ sapply( message$person, function(p) p$name )
 
 # read from a binary file connection
 f <- file( book, open = "rb" )
-message2 <- tutorial.AddressBook$read( f )
+message2 <- read( tutorial.AddressBook, f )
 close( f )
 
 # read from a message payload (raw vector)

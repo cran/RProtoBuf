@@ -1,3 +1,24 @@
+// -*- mode: C++; c-indent-level: 4; c-basic-offset: 4; tab-width: 8 -*-
+//
+// rprotobuf.h: R/C++ interface class library
+//
+// Copyright (C) 2009 - 2010 Dirk Eddelbuettel and Romain Francois
+//
+// This file is part of RProtoBuf.
+//
+// RProtoBuf is free software: you can redistribute it and/or modify it
+// under the terms of the GNU General Public License as published by
+// the Free Software Foundation, either version 2 of the License, or
+// (at your option) any later version.
+//
+// RProtoBuf is distributed in the hope that it will be useful, but
+// WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+// GNU General Public License for more details.
+//
+// You should have received a copy of the GNU General Public License
+// along with RProtoBuf.  If not, see <http://www.gnu.org/licenses/>.
+
 #ifndef RPROTOBUF_H
 #define RPROTOBUF_H
 
@@ -14,23 +35,40 @@
 #include <google/protobuf/io/coded_stream.h>
 #include <google/protobuf/service.h>
 #include <google/protobuf/descriptor.pb.h>
+#include <google/protobuf/text_format.h>
+namespace GPB = google::protobuf;
 
 #define R_NO_REMAP
 
 /* we need to read and write to connections */
 #define NEED_CONNECTION_PSTREAMS
 
+#include <RcppCommon.h>
+
+RCPP_ENUM_TRAITS(GPB::FieldDescriptor::Label)
+RCPP_ENUM_TRAITS(GPB::FieldDescriptor::CppType)
+RCPP_ENUM_TRAITS(GPB::FieldDescriptor::Type)
+
+//RCPP_TRAITS(GPB::int64,REALSXP)
+//RCPP_TRAITS(GPB::uint64,REALSXP)
+
 #include <Rcpp.h>
 
-#undef GET_NAMES
-// #include <R.h>
 #include <Rdefines.h>
-//#include <Rinternals.h>
 #include <R_ext/Callbacks.h>
 
 
 /* uncomment for debugging */
 // #define RPB_DEBUG
+
+#ifdef RPB_DEBUG
+#define RPB_DEBUG_BEGIN(__WHAT__) Rprintf( "<" #__WHAT__ ">\n" ) ;
+#define RPB_DEBUG_END(__WHAT__) Rprintf( "</" #__WHAT__ ">\n" ) ;
+#else 
+#define RPB_DEBUG_BEGIN(__WHAT__)
+#define RPB_DEBUG_END(__WHAT__)
+
+#endif
 
 #define FIN_DBG(ptr, CLAZZ) 
 // #define FIN_DBG(ptr, CLAZZ) Rprintf( "RProtoBuf finalizing %s (%p)\n", CLAZZ, ptr )
@@ -59,18 +97,16 @@
 
 #define XPP EXTPTR_PTR
 
-namespace GPB = google::protobuf;
-
-#define int32 GPB::int32
-#define uint32 GPB::uint32
-#define int64 GPB::int64
-#define uint64 GPB::uint64
-
 #define NEW_S4_OBJECT(CLAZZ) SEXP oo = PROTECT( NEW_OBJECT(MAKE_CLASS(CLAZZ)) ); \
   		if (!Rf_inherits(oo, CLAZZ)) throwException(CLAZZ, "CannotCreateObjectException" );
-
+  		
 namespace rprotobuf{
 
+typedef GPB::int32  int32  ;
+typedef GPB::uint32 uint32 ;
+typedef GPB::int64  int64  ;
+typedef GPB::uint64 uint64 ;
+	
 /* in rprotobuf.cpp */
 GPB::Message* PROTOTYPE( const GPB::Descriptor*) ;
 GPB::Message* CLONE(const GPB::Message*) ;
@@ -80,43 +116,13 @@ RcppExport SEXP getProtobufDescriptor( SEXP ) ;
 RcppExport SEXP readProtoFiles( SEXP, SEXP ); 
 RcppExport Rboolean isMessage( SEXP, const char* ) ;
 RcppExport GPB::FieldDescriptor* getFieldDescriptor(GPB::Message*, SEXP) ;
-RcppExport SEXP check_libprotobuf_version( SEXP ) ;
-RcppExport SEXP get_protobuf_library_version() ;
-
-/* in constructors.cpp */
-void Message_finalizer( SEXP ) ;
-RcppExport SEXP new_RS4_Descriptor( const GPB::Descriptor*  ); 
-RcppExport SEXP new_RS4_FieldDescriptor( const GPB::FieldDescriptor* ); 
-RcppExport SEXP new_RS4_EnumDescriptor( const GPB::EnumDescriptor*); 
-RcppExport SEXP new_RS4_Message_( const GPB::Message* );
-RcppExport SEXP new_RS4_ServiceDescriptor( const GPB::ServiceDescriptor* ) ;
-RcppExport SEXP new_RS4_MethodDescriptor( const GPB::MethodDescriptor* ) ;
-RcppExport SEXP new_RS4_FileDescriptor( const GPB::FileDescriptor* ) ;
-RcppExport SEXP new_RS4_EnumValueDescriptor( const GPB::EnumValueDescriptor* ) ;
 
 /* in extractors.cpp */
 RcppExport SEXP getMessageField( SEXP, SEXP ); 
-RcppExport SEXP extractFieldAsSEXP( const GPB::Message *, const GPB::Descriptor*, const GPB::FieldDescriptor* ) ;
-RcppExport SEXP get_message_descriptor( SEXP );
-RcppExport int MESSAGE_GET_REPEATED_INT( GPB::Message*, GPB::FieldDescriptor*, int) ;
-RcppExport double MESSAGE_GET_REPEATED_DOUBLE( GPB::Message*, GPB::FieldDescriptor*, int) ;
-RcppExport SEXP get_service_method( SEXP, SEXP) ; 
-
-/* in completion.cpp */
-RcppExport SEXP getMessageFieldNames( SEXP) ;
-RcppExport SEXP getDescriptorMemberNames( SEXP) ;
-RcppExport SEXP getFileDescriptorMemberNames( SEXP) ;
-RcppExport SEXP getEnumDescriptorConstantNames( SEXP ) ;
-RcppExport SEXP getServiceDescriptorMethodNames( SEXP ) ;
+RcppExport SEXP extractFieldAsSEXP( const Rcpp::XPtr<GPB::Message>& , const GPB::Descriptor*, const GPB::FieldDescriptor* ) ;
 
 /* in exceptions.cpp */
 RcppExport SEXP throwException( const char*, const char*) ;
-
-/* in serialize.cpp */
-RcppExport SEXP getMessagePayload( SEXP ) ;
-RcppExport std::string getMessagePayloadAs_stdstring( SEXP ) ;
-RcppExport SEXP serializeMessageToFile( SEXP , SEXP ) ;
-RcppExport SEXP serialize_to_connection( SEXP, SEXP ) ;
 
 /* in lookup.cpp */
 RcppExport SEXP newProtocolBufferLookup() ;
@@ -135,151 +141,11 @@ RcppExport std::string GET_stdstring( SEXP, int ) ;
 RcppExport void CHECK_values_for_enum( GPB::FieldDescriptor*, SEXP) ;
 RcppExport void CHECK_messages( GPB::FieldDescriptor*, SEXP) ;
 
-/* in aslist.cpp */
-RcppExport SEXP as_list_message( SEXP ) ;
-RcppExport SEXP as_list_descriptor( SEXP ); 
-RcppExport SEXP as_list_enum_descriptor( SEXP );
-RcppExport SEXP as_list_file_descriptor( SEXP ) ;
-RcppExport SEXP as_list_service_descriptor( SEXP ); 
-
-/* in ascharacter.cpp */
-RcppExport SEXP as_character_message( SEXP );
-RcppExport SEXP as_character_descriptor( SEXP ); 
-RcppExport SEXP as_character_enum_descriptor( SEXP ); 
-RcppExport SEXP as_character_field_descriptor(SEXP);
-RcppExport SEXP get_value_of_enum( SEXP, SEXP); 
-RcppExport SEXP as_character_service_descriptor(SEXP);
-RcppExport SEXP as_character_method_descriptor(SEXP);
-RcppExport SEXP as_character_file_descriptor( SEXP) ;
-RcppExport SEXP as_character_enum_value_descriptor( SEXP) ;
-
-/* in update.cpp */
-RcppExport SEXP update_message( SEXP, SEXP) ;
-
-/* in has.cpp */
-RcppExport SEXP message_has_field( SEXP, SEXP ); 
-
-/* in clone.cpp */
-RcppExport SEXP clone_message( SEXP ) ;
-
-/* in merge.cpp */
-RcppExport SEXP merge_message( SEXP, SEXP ); 
-
-/* in read.cpp */
-RcppExport SEXP readMessageFromFile( SEXP, SEXP ) ;
-RcppExport SEXP readMessageFromConnection( SEXP, SEXP ) ;
-RcppExport SEXP readMessageFromRawVector( SEXP, SEXP );
-
-/* in size.cpp */
-RcppExport SEXP get_message_bytesize( SEXP ) ;
-RcppExport SEXP get_field_size(SEXP, SEXP);
-RcppExport SEXP set_field_size(SEXP, SEXP, SEXP);
-
-/* in length.cpp */
-RcppExport SEXP get_message_length( SEXP ) ;
-
-/* in initialized.cpp */
-RcppExport SEXP is_message_initialized( SEXP ) ;
-
-/* in clear.cpp */
-RcppExport SEXP clear_message( SEXP ) ;
-RcppExport SEXP clear_message_field( SEXP, SEXP ) ;
-
-/* in swap.cpp */
-RcppExport SEXP message_swap_fields(SEXP, SEXP, SEXP, SEXP) ;
-
-/* in set.cpp */
-RcppExport SEXP set_field_values( SEXP, SEXP, SEXP, SEXP ) ;
-RcppExport SEXP get_field_values( SEXP, SEXP, SEXP) ;
-
-/* in identical.cpp */
-RcppExport SEXP identical_messages( SEXP, SEXP) ;
-RcppExport SEXP all_equal_messages( SEXP, SEXP, SEXP) ;
-
-/* in add.cpp */
-RcppExport SEXP message_add_values( SEXP, SEXP, SEXP);
-
-/* in methods.cpp */
-RcppExport SEXP get_method_output_type( SEXP) ;
-RcppExport SEXP get_method_input_type( SEXP) ;
-RcppExport SEXP get_method_output_prototype( SEXP) ;
-RcppExport SEXP get_method_input_prototype( SEXP) ;
-RcppExport SEXP valid_input_message( SEXP, SEXP) ;
-RcppExport SEXP valid_output_message( SEXP, SEXP) ;
-
-/* in fileDescriptor.cpp */
-RcppExport SEXP get_message_file_descriptor( SEXP) ;
-RcppExport SEXP get_descriptor_file_descriptor(SEXP) ;
-RcppExport SEXP get_enum_file_descriptor(SEXP) ;
-RcppExport SEXP get_field_file_descriptor(SEXP) ;
-RcppExport SEXP get_service_file_descriptor(SEXP) ;
-RcppExport SEXP get_method_file_descriptor(SEXP) ;
-
-/* in name.cpp */
-RcppExport SEXP name_descriptor( SEXP, SEXP ) ;
-RcppExport SEXP name_field_descriptor( SEXP, SEXP ) ;
-RcppExport SEXP name_enum_descriptor( SEXP, SEXP ) ;
-RcppExport SEXP name_service_descriptor( SEXP, SEXP ) ;
-RcppExport SEXP name_method_descriptor( SEXP, SEXP ) ;
-RcppExport SEXP name_file_descriptor( SEXP ) ;
-
-/* in as.cpp */
-RcppExport SEXP asMessage_Descriptor( SEXP ) ;
-RcppExport SEXP asMessage_FieldDescriptor( SEXP );
-RcppExport SEXP asMessage_EnumDescriptor( SEXP) ;
-RcppExport SEXP asMessage_ServiceDescriptor( SEXP ) ;         
-RcppExport SEXP asMessage_MethodDescriptor( SEXP ) ;
-RcppExport SEXP asMessage_FileDescriptor( SEXP ) ;
-RcppExport SEXP asMessage_EnumValueDescriptor( SEXP ) ;
-
-/* in containing_type.cpp */
-RcppExport SEXP containing_type__Descriptor( SEXP ); 
-RcppExport SEXP containing_type__EnumDescriptor( SEXP ); 
-RcppExport SEXP containing_type__FieldDescriptor( SEXP ); 
-RcppExport SEXP containing_type__ServiceDescriptor( SEXP ); 
-RcppExport SEXP containing_type__MethodDescriptor( SEXP ); 
-
-/* in field_count.cpp */
-RcppExport SEXP field_count__Descriptor( SEXP );
-RcppExport SEXP nested_type_count__Descriptor( SEXP );
-RcppExport SEXP enum_type_count__Descriptor( SEXP );
-RcppExport SEXP Descriptor_getFieldByIndex( SEXP, SEXP) ;
-RcppExport SEXP Descriptor_getFieldByNumber( SEXP, SEXP ) ;
-RcppExport SEXP Descriptor_getFieldByName(SEXP, SEXP) ;
-RcppExport SEXP Descriptor_getNestedTypeByIndex( SEXP, SEXP) ;
-RcppExport SEXP Descriptor_getNestedTypeByName( SEXP, SEXP); 
-RcppExport SEXP Descriptor_getEnumTypeByIndex( SEXP, SEXP);
-RcppExport SEXP Descriptor_getEnumTypeByName( SEXP, SEXP);
-
-/* in FieldDescriptor_wrapper.cpp */
-RcppExport SEXP FieldDescriptor_is_extension(SEXP) ;
-RcppExport SEXP FieldDescriptor_number(SEXP); 
-RcppExport SEXP FieldDescriptor_type(SEXP);
-RcppExport SEXP FieldDescriptor_cpp_type(SEXP);
-RcppExport SEXP FieldDescriptor_label(SEXP );
-RcppExport SEXP FieldDescriptor_is_repeated(SEXP);
-RcppExport SEXP FieldDescriptor_is_optional(SEXP);
-RcppExport SEXP FieldDescriptor_is_required(SEXP);
-RcppExport SEXP FieldDescriptor_is_has_default_value(SEXP);
-RcppExport SEXP FieldDescriptor_default_value(SEXP);
-RcppExport SEXP FieldDescriptor_message_type(SEXP);
-RcppExport SEXP FieldDescriptor_enum_type(SEXP); 
-
-/* in EnumDescriptor_wrapper.cpp */
-RcppExport SEXP EnumDescriptor_length(SEXP);
-RcppExport SEXP EnumDescriptor__value_count(SEXP) ;
-RcppExport SEXP EnumDescriptor_getValueByIndex(SEXP, SEXP) ;
-RcppExport SEXP EnumDescriptor_getValueByNumber(SEXP, SEXP) ;
-RcppExport SEXP EnumDescriptor_getValueByName(SEXP, SEXP);
-
-/* in ServiceDescriptor_wrapper.cpp */
+/* in wrapper_ServiceDescriptor.cpp */
 RcppExport SEXP ServiceDescriptor_length(SEXP);
 RcppExport SEXP ServiceDescriptor_method_count(SEXP) ;
 RcppExport SEXP ServiceDescriptor_getMethodByIndex(SEXP, SEXP) ;
 RcppExport SEXP ServiceDescriptor_getMethodByName(SEXP, SEXP) ;
-
-/* in rpc_over_http.cpp */
-RcppExport SEXP invoke_method_http( SEXP, SEXP, SEXP, SEXP, SEXP) ;
 
 /* in streams.cpp */
 void ZeroCopyInputStreamWrapper_finalizer( SEXP ); 
@@ -295,10 +161,6 @@ RcppExport SEXP ZeroCopyInputStream_ReadVarint32( SEXP ) ;
 RcppExport SEXP ZeroCopyInputStream_ReadVarint64( SEXP ) ;
 RcppExport SEXP ZeroCopyInputStream_ReadLittleEndian32( SEXP ) ;
 RcppExport SEXP ZeroCopyInputStream_ReadLittleEndian64( SEXP ) ;
-
-RcppExport SEXP ArrayInputStream_new( SEXP, SEXP ) ;
-
-RcppExport SEXP ArrayOutputStream_new( SEXP, SEXP ) ;
 
 RcppExport SEXP ZeroCopyOutputStream_Next(SEXP, SEXP) ;
 RcppExport SEXP ZeroCopyOutputStream_BackUp(SEXP, SEXP) ;
@@ -326,7 +188,56 @@ RcppExport SEXP ConnectionInputStream_new( SEXP , SEXP) ;
 
 RcppExport SEXP ConnectionOutputStream_new( SEXP , SEXP) ;
 
+	/**
+	 * simple class that wraps together a ZeroCopyOutputStream 
+	 * and its associated CodedOutputStream. Since we don't expose
+	 * CodedOutputStream at the R level, this allows to keep only one such 
+	 * object with each ZeroCopyOutputStream
+	 */
+	class ZeroCopyOutputStreamWrapper {
+		public:	                                    
+			ZeroCopyOutputStreamWrapper( GPB::io::ZeroCopyOutputStream* stream );
+			~ZeroCopyOutputStreamWrapper() ;
+			
+			GPB::io::ZeroCopyOutputStream* get_stream(); 
+			GPB::io::CodedOutputStream* get_coded_stream() ; 
+			
+		private: 
+			GPB::io::ZeroCopyOutputStream* stream ;
+			GPB::io::CodedOutputStream* coded_stream ;
+} ;
+
+	/**
+	 * simple class that wraps together a ZeroCopyInputStream 
+	 * and its associated CodedInputStream. Since we don't expose
+	 * CodedInputStream at the R level, this allows to keep only one such 
+	 * object with each zero copy input stream
+	 */
+	class ZeroCopyInputStreamWrapper {
+		public:	
+			ZeroCopyInputStreamWrapper( GPB::io::ZeroCopyInputStream* stream );
+			~ZeroCopyInputStreamWrapper() ;
+			
+			GPB::io::ZeroCopyInputStream* get_stream(); 
+			GPB::io::CodedInputStream* get_coded_stream() ; 
+			
+		private: 
+			GPB::io::ZeroCopyInputStream* stream ;
+			GPB::io::CodedInputStream* coded_stream ;
+	} ;
+
+
 } // namespace rprotobuf
 
+#include "S4_classes.h"
+#include "RconnectionCopyingInputStream.h"
+
+#define GET_ZCIS(xp) ( (ZeroCopyInputStreamWrapper*)XPP(xp) )->get_stream() 
+#define GET_CIS(xp) ( (ZeroCopyInputStreamWrapper*)XPP(xp) )->get_coded_stream()
+#define GET_FIS(xp) (GPB::io::FileInputStream*)( (ZeroCopyInputStreamWrapper*)XPP(xp) )->get_stream() 
+
+#define GET_ZCOS(xp) ( (ZeroCopyOutputStreamWrapper*)XPP(xp) )->get_stream() 
+#define GET_COS(xp) ( (ZeroCopyOutputStreamWrapper*)XPP(xp) )->get_coded_stream() 
+#define GET_FOS(xp) (GPB::io::FileOutputStream*)( (ZeroCopyOutputStreamWrapper*)XPP(xp) )->get_stream() 
 
 #endif

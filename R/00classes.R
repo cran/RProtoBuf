@@ -150,11 +150,11 @@ setMethod( "show", c( "EnumValueDescriptor" ), function(object){
 setMethod("$", "Message", function(x, name) {
 	
 	switch( name, 
-		"has" = function( what ) .Call( "message_has_field", x@pointer, what, PACKAGE = "RProtoBuf" ), 
-		"clone" = function( ... ) ._clone.message( x, ... ), 
-		"isInitialized" = function() isInitialized( x ), 
-		"serialize" = function(...) serialize( x, ... ),
-		"clear" = function(...) clear( x, ... ), 
+		"has" = function( ... )      .Call( "Message__has_field"     , x@pointer, ..., PACKAGE = "RProtoBuf"), 
+		"clone" = function( ... )    .Call( "Message__clone"         , x@pointer, ..., PACKAGE = "RProtoBuf"), 
+		"isInitialized" = function() .Call( "Message__is_initialized", x@pointer,      PACKAGE = "RProtoBuf"),    
+		"descriptor" = function()    .Call( "Message__descriptor"     , x@pointer,      PACKAGE = "RProtoBuf" ), 
+		
 		"size"  = function(field, ...) size(x, field, ... ),
 		"bytesize" = function() bytesize(x), 
 		"swap" = function(...) swap(x,...),
@@ -168,7 +168,9 @@ setMethod("$", "Message", function(x, name) {
 		"toString" = function(...) toString( x, ... ),
 		"add" = function(...) add( x, ...), 
 		
-		"descriptor" = function() descriptor(x), 
+		"serialize" = function(...) serialize( x, ... ),
+		"clear" = function(...) clear( x, ... ), 
+		
 		"fileDescriptor" = function() fileDescriptor(x ), 
 		
 		# default
@@ -184,6 +186,7 @@ setMethod("$", "Descriptor", function(x, name) {
 	switch( name, 
 		"new" = function( ... ) newProto( x, ... ) , 
 		"read" = function( input ) read( x, input ) ,
+		"readASCII" = function( input ) readASCII( x, input ), 
 		"toString" = function(...) toString(x, ...) ,
 		"as.character" = function(...) as.character(x, ...) ,
 		"as.list" = function(...) as.character(x, ...) ,
@@ -258,7 +261,7 @@ setMethod( "$", "ServiceDescriptor", function(x, name ){
 		"method_count" = function() method_count(x), 
 		"method" = function(...) method(x, ... ), 
 		
-		.Call( "get_service_method", x@pointer, name, PACKAGE = "RProtoBuf" )
+		.Call( "ServiceDescriptor__method", x@pointer, name, PACKAGE = "RProtoBuf" )
 		)
 } )
 
@@ -384,7 +387,7 @@ setMethod("[[", "ServiceDescriptor", function(x, i, j, ..., exact = TRUE){
 		warning( "`j` is ignored" )
 	}
 	if( is.character( i ) || is.numeric( i ) ){
-		.Call( "get_service_method", x@pointer, name, PACKAGE = "RProtoBuf" )
+		.Call( "ServiceDescriptor__method", x@pointer, name, PACKAGE = "RProtoBuf" )
 	} else{
 		stop( "wrong type, `i` should be a character or a number" )
 	}
@@ -440,7 +443,7 @@ setMethod( "update", "Message", function( object, ... ){
 # {{{ length
 setGeneric( "length" )
 setMethod( "length", "Message", function( x ){
-	.Call( "get_message_length", x@pointer, PACKAGE = "RProtoBuf" )
+	.Call( "Message__length", x@pointer, PACKAGE = "RProtoBuf" )
 } )
 setMethod( "length", "EnumDescriptor", function( x ){
 	.Call( "EnumDescriptor_length", x@pointer, PACKAGE = "RProtoBuf" )
@@ -468,52 +471,52 @@ setGeneric( "name", function(object, full = FALSE){
 })
 setMethod( "name", c( object = "Descriptor" ) , 
 function(object, full = FALSE){
-	.Call( "name_descriptor", object@pointer, full, PACKAGE = "RProtoBuf" )
+	.Call( "Descriptor__name", object@pointer, full, PACKAGE = "RProtoBuf" )
 }) 
 setMethod( "name", c( object = "FieldDescriptor" ) , 
 function(object, full = FALSE){
-	.Call( "name_descriptor", object@pointer, full, PACKAGE = "RProtoBuf" )
+	.Call( "FieldDescriptor__name", object@pointer, full, PACKAGE = "RProtoBuf" )
 })
 setMethod( "name", c( object = "EnumDescriptor" ) , 
 function(object, full = FALSE){
-	.Call( "name_enum_descriptor", object@pointer, full, PACKAGE = "RProtoBuf" )
+	.Call( "EnumDescriptor__name", object@pointer, full, PACKAGE = "RProtoBuf" )
 })
 setMethod( "name", c( object = "ServiceDescriptor" ) , 
 function(object, full = FALSE){
-	.Call( "name_service_descriptor", object@pointer, full, PACKAGE = "RProtoBuf" )
+	.Call( "ServiceDescriptor__name", object@pointer, full, PACKAGE = "RProtoBuf" )
 })
 setMethod( "name", c( object = "MethodDescriptor" ) , 
 function(object, full = FALSE){
-	.Call( "name_method_descriptor", object@pointer, full, PACKAGE = "RProtoBuf" )
+	.Call( "MethodDescriptor__name", object@pointer, full, PACKAGE = "RProtoBuf" )
 })
 setMethod( "name", c( object = "FileDescriptor" ) , 
 function(object, full = FALSE){
-	filename <- .Call( "name_file_descriptor", object@pointer, PACKAGE = "RProtoBuf" )
+	filename <- .Call( "FileDescriptor__name", object@pointer, PACKAGE = "RProtoBuf" )
 	if( full ) filename else basename( filename )
 })
 # }}}
 
 # {{{ as
 setAs("Descriptor", "Message", function(from){
-	.Call( "asMessage_Descriptor", from@pointer, PACKAGE = "RProtoBuf" )
+	.Call( "Descriptor__as_Message", from@pointer, PACKAGE = "RProtoBuf" )
 })
 setAs("FieldDescriptor", "Message", function(from){
-	.Call( "asMessage_FieldDescriptor", from@pointer, PACKAGE = "RProtoBuf" )
+	.Call( "FieldDescriptor__as_Message", from@pointer, PACKAGE = "RProtoBuf" )
 })
 setAs("EnumDescriptor", "Message", function(from){
-	.Call( "asMessage_EnumDescriptor", from@pointer, PACKAGE = "RProtoBuf" )
+	.Call( "EnumDescriptor__as_Message", from@pointer, PACKAGE = "RProtoBuf" )
 })
 setAs("ServiceDescriptor", "Message", function(from){
-	.Call( "asMessage_ServiceDescriptor", from@pointer, PACKAGE = "RProtoBuf" )
+	.Call( "ServiceDescriptor__as_Message", from@pointer, PACKAGE = "RProtoBuf" )
 })
 setAs("MethodDescriptor", "Message", function(from){
-	.Call( "asMessage_MethodDescriptor", from@pointer, PACKAGE = "RProtoBuf" )
+	.Call( "MethodDescriptor__as_Message", from@pointer, PACKAGE = "RProtoBuf" )
 })
 setAs("FileDescriptor", "Message", function(from){
-	.Call( "asMessage_FileDescriptor", from@pointer, PACKAGE = "RProtoBuf" )
+	.Call( "FileDescriptor__as_Message", from@pointer, PACKAGE = "RProtoBuf" )
 })
 setAs("EnumValueDescriptor", "Message", function(from){
-	.Call( "asMessage_EnumValueDescriptor", from@pointer, PACKAGE = "RProtoBuf" )
+	.Call( "EnumValueDescriptor__as_Message", from@pointer, PACKAGE = "RProtoBuf" )
 })
 asMessage <- function( x, ... ){
 	as( x, "Message", ... )

@@ -80,7 +80,7 @@ Rf_PrintValue( type ) ;
 		}
 	}
 	
-	return( new_RS4_Descriptor( desc ) ) ;
+	return( S4_Descriptor( desc ) ) ;
 }
 
 /**
@@ -92,9 +92,6 @@ SEXP newProtoMessage( SEXP descriptor ){
 
 #ifdef RPB_DEBUG
 Rprintf( "<newProtoMessage>\n" ) ;
-#endif
-
-#ifdef RPB_DEBUG
 	/* FIXME: the message type, we don't really need that*/
 	SEXP type = GET_SLOT( descriptor, Rf_install("type") ) ;
 #endif
@@ -116,7 +113,7 @@ PRINT_DEBUG_INFO( "type", type ) ;
 Rprintf( "</newProtoMessage>\n" ) ;
 #endif
 	
-	return( new_RS4_Message_( message )  ) ;
+	return( S4_Message( message )  ) ;
 }
 
 /**
@@ -136,7 +133,7 @@ SEXP do_dollar_Descriptor( SEXP pointer, SEXP name ){
 	if( desc->field_count() ){
 		const GPB::FieldDescriptor*  fd = desc->FindFieldByName(what) ;
 		if( fd ){
-			return( new_RS4_FieldDescriptor(fd ) ) ;
+			return( S4_FieldDescriptor(fd ) ) ;
 		}
 	}
 	
@@ -144,7 +141,7 @@ SEXP do_dollar_Descriptor( SEXP pointer, SEXP name ){
 	if( desc->nested_type_count() ){
 		const GPB::Descriptor* d = desc->FindNestedTypeByName(what) ;
 		if( d ){
-			return( new_RS4_Descriptor( d ) ) ;
+			return( S4_Descriptor( d ) ) ;
 		}
 	}
 	
@@ -152,7 +149,7 @@ SEXP do_dollar_Descriptor( SEXP pointer, SEXP name ){
 	if( desc->enum_type_count() ){
 		const GPB::EnumDescriptor* ed = desc->FindEnumTypeByName(what) ;
 		if( ed ){
-			return( new_RS4_EnumDescriptor( ed ) ) ;
+			return( S4_EnumDescriptor( ed ) ) ;
 		}
 	}
 	
@@ -193,41 +190,37 @@ GPB::FieldDescriptor* getFieldDescriptor(GPB::Message* message, SEXP name){
 	GPB::FieldDescriptor* field_desc = (GPB::FieldDescriptor*)0;
 	const GPB::Descriptor* desc = message->GetDescriptor() ;
 	switch( TYPEOF(name) ){
+		case CHARSXP:
+			{
+				field_desc = (GPB::FieldDescriptor*)desc->FindFieldByName( CHAR(name) ) ;
+				break ;	
+			}
 		case STRSXP:
 			{
-				const char * what = CHAR( STRING_ELT(name, 0 ) ) ;
-				field_desc = (GPB::FieldDescriptor*)desc->FindFieldByName( what ) ;
+				field_desc = (GPB::FieldDescriptor*)desc->FindFieldByName( CHAR( STRING_ELT(name, 0 ) ) ) ;
 				break ;
 			}
-		case REALSXP: 
-			{
-				field_desc = (GPB::FieldDescriptor*)desc->FindFieldByNumber( (int)REAL(name)[0] ) ;
-				break ;
-			}
+		case REALSXP:
 		case INTSXP:
 			{
-				field_desc = (GPB::FieldDescriptor*)desc->FindFieldByNumber( INTEGER(name)[0] ) ;
+				field_desc = (GPB::FieldDescriptor*)desc->FindFieldByNumber( Rcpp::as<int>( name ) ) ;
 				break ;
 			}
 	}
-	
 	if( !field_desc ){
 		throwException( "could not get FieldDescriptor for field", "NoSuchFieldException" ) ;
 	}
-	
 	return field_desc ;
 }
 
-SEXP check_libprotobuf_version( SEXP minversion ){
-
-	if( GOOGLE_PROTOBUF_VERSION < INTEGER(minversion)[0] ){
-		Rf_error( "The protobuf library you are using is too old for this package, please upgrade" ) ;
+RCPP_FUNCTION_VOID_1( check_libprotobuf_version, int minversion ){
+	if( GOOGLE_PROTOBUF_VERSION < minversion ){
+		throw std::range_error( "The protobuf library you are using is too old for this package, please upgrade" ) ;
 	}
-	return( R_NilValue ) ;
 }
 
-SEXP get_protobuf_library_version(){
-	return( Rf_ScalarInteger( GOOGLE_PROTOBUF_VERSION ) );
+RCPP_FUNCTION_0(int, get_protobuf_library_version){
+	return GOOGLE_PROTOBUF_VERSION;
 }
 
 } // namespace rprotobuf

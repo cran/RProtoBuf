@@ -1,4 +1,9 @@
+0.2.0   2010-09-10
 
-0.0-4	(under development)
-   o 	initial release
+   o 	Second release with numerous internal changes made possible by
+        changes in Rcpp
+
+0.1-0	2010-02-01
+
+   o 	Initial CRAN release
 

@@ -1,8 +1,39 @@
+2010-09-11  Dirk Eddelbuettel  <edd@debian.org>
+
+	* DESCRIPTION: Release 0.2.0
+
+2010-09-10  Romain Francois <romain@r-enthusiasts.com>
+
+	* man/readASCII.Rd: Rd documentation for readASCII
+
+2010-08-20  Romain Francois <romain@r-enthusiasts.com>
+
+	* R/read/.R: New readASCII method
+
+2010-08-12  Romain Francois <romain@r-enthusiasts.com>
+
+	* src/*: restore R CMD check
+
+2010-08-04  Dirk Eddelbuettel  <edd@debian.org>
+
+	* inst/unitTests/runit.addressbook.R: start of new unit tests
+
+2010-07-30  Romain Francois <romain@r-enthusiasts.com>
+
+	* src/*: correct many small errors so that the vignette builds again
+
+2010-02-02  Dirk Eddelbuettel  <edd@debian.org>
+
+	* configure.in: More rigorous checks for ProtoBuf headers, library,
+	  mininal version as well as availability of pkg-config.
+
 2010-02-01  Dirk Eddelbuettel  <edd@debian.org>
 
 	* inst/ChangeLog: added
 
 2010-02-01  Romain Francois <francoisromain@free.fr>
+
+	* Release 0.1-0
 
 	* [r274] /pkg/man/RProtoBuf-package.Rd: tidying up
 

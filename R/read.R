@@ -6,11 +6,11 @@ setGeneric( "read", function( descriptor, input ){
 setMethod( "read", c( descriptor = "Descriptor" , input = "character" ), 
 function(descriptor, input ){
 	file <- tools:::file_path_as_absolute( input )
-	.Call( "readMessageFromFile", descriptor@pointer, file, PACKAGE = "RProtoBuf" ) 
+	.Call( "Descriptor__readMessageFromFile", descriptor@pointer, file, PACKAGE = "RProtoBuf" ) 
 } )
 
 setMethod( "read", c( descriptor = "Descriptor", input = "raw" ), function(descriptor, input ){
-	.Call( "readMessageFromRawVector", descriptor@pointer, input, PACKAGE="RProtoBuf" )
+	.Call( "Descriptor__readMessageFromRawVector", descriptor@pointer, input, PACKAGE="RProtoBuf" )
 } )
 
 setMethod( "read", c( descriptor = "Descriptor" ), 
@@ -21,7 +21,32 @@ function( descriptor, input ){
 	sc <- summary( input )
 	wasopen <- identical( sc[["opened"]], "opened" )
 	if( !wasopen ) open( input )
-	message <- .Call( "readMessageFromConnection", descriptor@pointer, input, PACKAGE = "RProtoBuf" )
+	message <- .Call( "Descriptor__readMessageFromConnection", descriptor@pointer, input, PACKAGE = "RProtoBuf" )
+	if( !wasopen ) close( input )
+	message
+} )
+
+
+
+
+setGeneric( "readASCII", function( descriptor, input ){
+	standardGeneric( "readASCII" )
+} )
+
+setMethod( "readASCII", c( descriptor = "Descriptor" , input = "character" ), 
+function(descriptor, input ){
+	.Call( "Descriptor__readASCII_FromString", descriptor@pointer, input, PACKAGE = "RProtoBuf" ) 
+} )
+
+setMethod( "readASCII", c( descriptor = "Descriptor" ), 
+function( descriptor, input ){
+	if( !inherits( input, "connection" ) ){ 
+		stop( "can only read from connections" )
+	}
+	sc <- summary( input )
+	wasopen <- identical( sc[["opened"]], "opened" )
+	if( !wasopen ) open( input )
+	message <- .Call( "Descriptor__readASCII_FromConnection", descriptor@pointer, input, PACKAGE = "RProtoBuf" )
 	if( !wasopen ) close( input )
 	message
 } )

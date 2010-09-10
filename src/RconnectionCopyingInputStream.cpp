@@ -3,9 +3,8 @@
 
 namespace rprotobuf{
 	
-	RconnectionCopyingInputStream::RconnectionCopyingInputStream(int id){
-		connection_id = id ;
-	}
+	RconnectionCopyingInputStream::RconnectionCopyingInputStream(int id) : 
+		connection_id(id){}
 	
 	/** 
 	 * call readBin to read size bytes from R
@@ -17,26 +16,17 @@ namespace rprotobuf{
 	 */
 	int	RconnectionCopyingInputStream::Read(void * buffer, int size){
 		
-		SEXP call = PROTECT( getReadBinCall( size ) ) ;
-		SEXP res = PROTECT( Rf_eval( call, R_GlobalEnv ) ); 
-		
-		int len = LENGTH( res ) ;
-		memcpy( buffer, RAW(res), len ) ;
-		
-		UNPROTECT( 2 ) ; /* res, call */ 
+		Rcpp::Language call( "readBin", connection_id, Rcpp::RawVector(0), size ) ;
+		Rcpp::RawVector res ;
+		try{
+			res = call.eval(); 
+		}  catch( ... ){
+			return 0 ;
+		}
+		int len = res.size() ;
+		memcpy( buffer, reinterpret_cast<const void*>(res.begin()), len) ;
 		return len ;
 	}
-	
-	/* makes the call : readBin( con, raw(0), size ) */
-	SEXP RconnectionCopyingInputStream::getReadBinCall( int size ){
-		SEXP con = PROTECT( Rf_ScalarInteger(connection_id) );
-		SEXP what = PROTECT( Rf_allocVector(RAWSXP, 0) ) ;
-		SEXP n = PROTECT( Rf_ScalarInteger( size ) );
-		SEXP call = PROTECT( Rf_lang4( Rf_install( "readBin" ), con, what, n) ) ; 
-		UNPROTECT(4) ; /* call, n, what, con */
-		return call ;
-	}
-	
 	
 }
 
