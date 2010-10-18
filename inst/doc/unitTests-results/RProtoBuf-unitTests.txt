@@ -1,16 +1,12 @@
-RUNIT TEST PROTOCOL -- Sat Sep 11 08:26:25 2010 
+RUNIT TEST PROTOCOL -- Mon Oct 18 09:55:04 2010 
 *********************************************** 
-Number of test functions: 3 
-Number of errors: 1 
+Number of test functions: 5 
+Number of errors: 0 
 Number of failures: 0 
 
  
 1 Test Suite : 
-RProtoBuf unit testing - 3 test functions, 1 error, 0 failures
-ERROR in /tmp/Rinst2001904304/RProtoBuf/unitTests/runit.addressbook.R: Error while sourcing  /tmp/Rinst2001904304/RProtoBuf/unitTests/runit.addressbook.R : Error in parse(n = -1, file = file) : 30:0: unexpected end of input
-28:     checkEquals(book$person[[2]]$phone[[1]]$type,   0,                   msg="Second person phone number")
-29: }
-   ^
+RProtoBuf unit testing - 5 test functions, 0 errors, 0 failures
 
 
 
@@ -20,15 +16,15 @@ Test Suite: RProtoBuf unit testing
 Test function regexp: ^test.+ 
 Test file regexp: ^runit.+\.[rR]$ 
 Involved directory: 
-/tmp/Rinst2001904304/RProtoBuf/unitTests 
+/tmp/Rtmprqad0w/Rinst17baad1/RProtoBuf/unitTests 
 --------------------------- 
-Test file: /tmp/Rinst2001904304/RProtoBuf/unitTests/runit.addressbook.R 
-/tmp/Rinst2001904304/RProtoBuf/unitTests/runit.addressbook.R: ERROR !! 
-Error while sourcing  /tmp/Rinst2001904304/RProtoBuf/unitTests/runit.addressbook.R : Error in parse(n = -1, file = file) : 30:0: unexpected end of input
-28:     checkEquals(book$person[[2]]$phone[[1]]$type,   0,                   msg="Second person phone number")
-29: }
-   ^
+Test file: /tmp/Rtmprqad0w/Rinst17baad1/RProtoBuf/unitTests/runit.addressbook.R 
+test.personOne: (11 checks) ... OK (0.01 seconds)
+test.size: (3 checks) ... OK (0 seconds)
 --------------------------- 
-Test file: /tmp/Rinst2001904304/RProtoBuf/unitTests/runit.golden.message.R 
+Test file: /tmp/Rtmprqad0w/Rinst17baad1/RProtoBuf/unitTests/runit.bytes.R 
+test.all: (7 checks) ... OK (0 seconds)
+--------------------------- 
+Test file: /tmp/Rtmprqad0w/Rinst17baad1/RProtoBuf/unitTests/runit.golden.message.R 
 test.import: (5 checks) ... OK (0 seconds)
-test.readProtoFile: (61 checks) ... OK (0.01 seconds)
+test.readProtoFile: (61 checks) ... OK (0 seconds)
