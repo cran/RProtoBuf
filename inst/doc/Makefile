@@ -2,7 +2,7 @@
 all: clean RProtoBuf-unitTests.pdf RProtoBuf.pdf RProtoBuf-quickref.pdf
 
 clean:
-	rm -fr *.pdf
+	@rm -fr *.pdf
 
 RProtoBuf-unitTests.pdf: unitTests/RProtoBuf-unitTests.R
 	Rscript --default-packages="RProtoBuf,Rcpp,brew,RUnit,tools,utils" unitTests/RProtoBuf-unitTests.R
@@ -30,4 +30,4 @@ RProtoBuf-quickref.pdf: RProtoBuf-quickref/RProtoBuf-quickref.Rnw
 	rm -fr RProtoBuf-quickref.log
 	rm -fr RProtoBuf-quickref.out
 	cp RProtoBuf-quickref/RProtoBuf-quickref-fake.Rnw RProtoBuf-quickref.Rnw
-	
+

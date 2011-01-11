@@ -1,3 +1,38 @@
+2011-01-11  Dirk Eddelbuettel  <edd@debian.org>
+
+	* DESCRIPTION: Release 0.2.2
+
+	* inst/THANKS: Added new file to say Thanks!
+
+2011-01-10  Dirk Eddelbuettel  <edd@debian.org>
+
+	* Applied another patch by Murray Stokely providing:
+	   - R/internals.R: generalise readProtoFiles() adding 'pattern' arg
+	   - man/readProtoFiles.Rd: documenting new 'pattern' argument
+	   - src/DescriptorPoolLookup.cpp: enhanced error message
+	   - inst/unitTests/runit.golden.message.R: new unit test for
+	     repeated fields fixed (which was issue addressed earlier)
+	   - inst/runit.import.R: new unit test for non-existing file
+
+2011-01-07  Dirk Eddelbuettel  <edd@debian.org>
+
+	* Applied patch by Murray Stokely providing all the following:
+	   - src/S4_classes.h: new 'name' and 'full_name' slots
+	   - R/00classes.R: idem
+	   - R/wrapper_EnumDescriptor.R: fix typo now permitting function call
+	   - src/wrapper_EnumDescriptor.cpp: add a bounds check
+	   - src/wrapper_EnumValueDescriptor.cpp: add a new name method
+	   - inst/unitTests/runit.enums.R: add new unit test
+
+	* man/EnumValueDescriptor-class.Rd: Add documentation for name
+	and full_name
+
+2010-10-20  Dirk Eddelbuettel  <deddelbuettel@wolve.com>
+
+	* inst/doc/Makefile: do not remove the pdf in 'clean'
+
+	* inst/unitTests/runit.addressbook.R: stick 'book' into global env.
+
 2010-10-18  Dirk Eddelbuettel  <edd@debian.org>
 
 	* DESCRIPTION: Release 0.2.1

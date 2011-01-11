@@ -1,6 +1,6 @@
 Package: RProtoBuf
-Version: 0.2.1
-Date: $Date: 2010-10-18 09:53:56 -0500 (Mon, 18 Oct 2010) $
+Version: 0.2.2
+Date: $Date: 2011-01-11 20:07:05 -0600 (Tue, 11 Jan 2011) $
 Author: Romain Francois <romain@r-enthusiasts.com> and Dirk
         Eddelbuettel <edd@debian.org>
 Maintainer: Romain and Dirk <RomainAndDirk@r-enthusiasts.com>
@@ -23,6 +23,6 @@ MinimumLibProtoVersion: 2002000
 BugReports:
         http://r-forge.r-project.org/tracker/index.php?group_id=576&atid=2338
 OS_type: unix
-Packaged: 2010-10-18 14:55:10.988714 UTC; edd
+Packaged: 2011-01-12 02:28:17.389355 UTC; edd
 Repository: CRAN
-Date/Publication: 2010-10-18 19:09:48
+Date/Publication: 2011-01-12 07:55:39

@@ -55,4 +55,9 @@ test.readProtoFile <- function(){
 	
 }
 
-
+# Early versions of RProtoBuf did not support repeated messages properly.
+test.repeatedFields <- function(){
+	test <- new(protobuf_unittest.TestAllTypes)
+	test$add("repeated_int32", c(1:5))
+	checkEquals(test$repeated_int32, c(1:5))
+}
