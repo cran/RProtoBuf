@@ -1,3 +1,13 @@
+0.2.3   2011-04-12
+
+   o 	Protect UINT64 and INT64 with '#ifdef RCPP_HAS_LONG_LONG' which
+        itself is valid with either g++ <= 4.4, or newer versions if the 
+	-std=c++0x is used
+
+    o   The documentation Makefile now uses the $R_HOME environment variable
+
+    o   The documentation Makefile no longer calls clean in the all target
+
 0.2.2   2011-01-11
 
    o 	Applied two patches by Murray Stokely which 

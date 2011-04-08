@@ -1,3 +1,26 @@
+2011-04-12  Dirk Eddelbuettel  <edd@debian.org>
+
+	* DESCRIPTION: Release 0.2.3
+
+2011-04-10  Dirk Eddelbuettel  <edd@dexter>
+
+	* src/extractors.cpp: Protect UINT64 and INT64 inside of #ifdef test
+	for RCPP_HAS_LONG_LONG_TYPES which we now need for g++ 4.5 or later
+	* src/mutators.cpp: Idem
+	* wrapper_FieldDescriptor.cpp: Idem
+
+2011-04-05  Dirk Eddelbuettel  <edd@debian.org>
+
+	* inst/doc/Makefile: Call R and Rscript relative to R_HOME/bin
+
+2011-04-04  Dirk Eddelbuettel  <edd@debian.org>
+
+	* inst/doc/Makefile: Do not call clean in all target
+
+2011-01-12  Dirk Eddelbuettel  <edd@debian.org>
+
+	* R/with.R: Use envir= argument to eval()
+
 2011-01-11  Dirk Eddelbuettel  <edd@debian.org>
 
 	* DESCRIPTION: Release 0.2.2

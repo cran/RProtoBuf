@@ -1,3 +1,23 @@
+// -*- mode: C++; c-indent-level: 4; c-basic-offset: 4; tab-width: 4 -*-
+/* :tabSize=4:indentSize=4:noTabs=false:folding=explicit:collapseFolds=1: */
+//
+// Copyright (C) 2010 - 2011  Dirk Eddelbuettel and Romain Francois
+//
+// This file is part of RProtoBuf.
+//
+// RProtoBuf is free software: you can redistribute it and/or modify it
+// under the terms of the GNU General Public License as published by
+// the Free Software Foundation, either version 2 of the License, or
+// (at your option) any later version.
+//
+// RProtoBuf is distributed in the hope that it will be useful, but
+// WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+// GNU General Public License for more details.
+//
+// You should have received a copy of the GNU General Public License
+// along with RProtoBuf.  If not, see <http://www.gnu.org/licenses/>.
+
 #include "rprotobuf.h" 
 #include "fieldtypes.h" 
 /* :tabSize=4:indentSize=4:noTabs=false:folding=explicit:collapseFolds=1: */
@@ -964,23 +984,28 @@ PRINT_DEBUG_INFO( "value", value ) ;
 			// {{{ simple cases using macro expansion
 #undef HANDLE_SINGLE_FIELD
 #define HANDLE_SINGLE_FIELD( CPPTYPE, CAMEL, TYPE )						\
-case CPPTYPE :																\
-	{																		\
-		ref->Set##CAMEL( message, field_desc, Rcpp::as<TYPE>(value) ) ;	\
-		break ;   															\
-	}
-HANDLE_SINGLE_FIELD( CPPTYPE_INT32, Int32, GPB::int32) ;
-HANDLE_SINGLE_FIELD( CPPTYPE_INT64, Int64, GPB::int64) ;
-HANDLE_SINGLE_FIELD( CPPTYPE_UINT32, UInt32, GPB::uint32) ;
-HANDLE_SINGLE_FIELD( CPPTYPE_UINT64, UInt64, GPB::uint64) ;
-HANDLE_SINGLE_FIELD( CPPTYPE_DOUBLE, Double, double) ;
-HANDLE_SINGLE_FIELD( CPPTYPE_FLOAT, Float, float) ;
-HANDLE_SINGLE_FIELD( CPPTYPE_BOOL, Bool, bool) ;
+			case CPPTYPE :												\
+				{														\
+					ref->Set##CAMEL( message, field_desc, Rcpp::as<TYPE>(value) ) ;	\
+					break ;												\
+				}
+
+			HANDLE_SINGLE_FIELD( CPPTYPE_INT32, Int32, GPB::int32) ;
+			HANDLE_SINGLE_FIELD( CPPTYPE_UINT32, UInt32, GPB::uint32) ;
+#ifdef RCPP_HAS_LONG_LONG_TYPES
+			HANDLE_SINGLE_FIELD( CPPTYPE_INT64, Int64, GPB::int64) ;
+			HANDLE_SINGLE_FIELD( CPPTYPE_UINT64, UInt64, GPB::uint64) ;
+#endif
+			HANDLE_SINGLE_FIELD( CPPTYPE_DOUBLE, Double, double) ;
+			HANDLE_SINGLE_FIELD( CPPTYPE_FLOAT, Float, float) ;
+			HANDLE_SINGLE_FIELD( CPPTYPE_BOOL, Bool, bool) ;
 #undef HANDLE_SINGLE_FIELD
+			default:
+				throwException("Unsupported type", "ConversionException");
 // }}}  
      		
 			// {{{ string
-			case CPPTYPE_STRING:
+		    case CPPTYPE_STRING:
     			{
     				switch( TYPEOF( value ) ){
     					case STRSXP:
@@ -1013,7 +1038,7 @@ HANDLE_SINGLE_FIELD( CPPTYPE_BOOL, Bool, bool) ;
 			// }}}
     		
 			// {{{ message
-    		case CPPTYPE_MESSAGE:
+		case CPPTYPE_MESSAGE:
     			{
     				if( TYPEOF( value ) == S4SXP && Rf_inherits( value, "Message" ) ){
     					GPB::Message* mess = (GPB::Message*) EXTPTR_PTR( GET_SLOT( value, Rf_install("pointer") ) ) ;
@@ -1032,7 +1057,7 @@ HANDLE_SINGLE_FIELD( CPPTYPE_BOOL, Bool, bool) ;
     			// }}}
     		
 			// {{{ enum
-    		case CPPTYPE_ENUM : 
+		case CPPTYPE_ENUM : 
     			{
     				const GPB::EnumDescriptor* enum_desc = field_desc->enum_type() ;
     				
