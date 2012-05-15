@@ -1,6 +1,17 @@
+0.2.4   2012-05-15
+
+    o   Applied several patches kindly supplied by Murray Stokely to
+         - properly work with repeated strings 
+	 - correct C++ function naming in a few instances
+	 - add an example of ascii export/import of messages
+
+    o   Suppport g++-4.7 and stricter #include file checking by adding unistd
+
+    o   Made small improvements to the startup code
+
 0.2.3   2011-04-12
 
-   o 	Protect UINT64 and INT64 with '#ifdef RCPP_HAS_LONG_LONG' which
+    o 	Protect UINT64 and INT64 with '#ifdef RCPP_HAS_LONG_LONG' which
         itself is valid with either g++ <= 4.4, or newer versions if the 
 	-std=c++0x is used
 

@@ -220,7 +220,7 @@ RCPP_FUNCTION_1(S4_Descriptor, METHOD(descriptor), Rcpp::XPtr<GPB::Message> mess
 	return( message->GetDescriptor() ) ;
 }
 
-RCPP_XP_METHOD_0( METHOD(as_character) , GPB::Message, DebugString) ;
+RCPP_XP_METHOD_0( METHOD(as_character) , GPB::Message, DebugString) 
 RCPP_XP_METHOD_0( METHOD(bytesize), GPB::Message, ByteSize )
 
 RCPP_FUNCTION_2( int, METHOD(field_size), Rcpp::XPtr<GPB::Message> message, SEXP field  ){

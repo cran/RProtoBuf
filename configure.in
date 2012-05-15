@@ -2,7 +2,7 @@
 #
 # RProtoBuf configure.in by Dirk Eddelbuettel <edd@debian.org>
 #
-# $Id: configure.in 301 2010-04-08 07:45:06Z romain $
+# $Id: configure.in 443 2012-05-14 01:46:37Z edd $
 
 # require at least autoconf 2.61
 AC_PREREQ(2.61)

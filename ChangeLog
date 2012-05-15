@@ -1,3 +1,55 @@
+2012-05-15  Dirk Eddelbuettel  <edd@debian.org>
+
+ 	* DESCRIPTION: Release 0.2.4
+
+	* R/zzz.R (.onLoad): pass lib.loc=libname to readProtoFiles
+	* R/internals.R (readProtoFiles): use lib.loc argument
+	* man/readProtoFiles.Rd: Document new lib.loc argument
+
+2012-05-14  Dirk Eddelbuettel  <edd@debian.org>
+
+	* R/lookup.R: comment-out unlockBinding() which R CMD check does not
+	like as it turns out that we do not need it here anyway
+
+	* inst/unitTests/runit.addressbook.R (test.ascii): Small correction
+	by converting to character before comparing
+
+	* DESCRIPTION: Remove Depends: on int64 which is no longer used,
+	lower Depends: on Rcpp to 0.9.6 which should be sufficient
+
+2012-05-13  Dirk Eddelbuettel  <edd@debian.org>
+
+	* src/rprotobuf.h: Added '#include <unistd.h>' to make g++-4.7 happy
+
+	* src/*: Reversed out SVN revisions 426 to 434 related to int64
+
+2012-04-07  Dirk Eddelbuettel  <edd@debian.org>
+
+	* R/zzz.R: Add 'lib.loc=libname' to packageDescription() call as
+	requested by Brian Ripley
+
+2012-03-20  Dirk Eddelbuettel  <edd@debian.org>
+
+	* Applied another patch by Murray:
+	  - src/mutators.cpp: Deal with case of repeated strings
+	  - inst/unitTests/runit.golden.message.R: test for this case
+
+2011-07-17  Dirk Eddelbuettel  <edd@debian.org>
+
+	* Applied another patch by Murray:
+	  - src/wrapper_Descriptor.cpp: Add missing readASCIIFromConnection
+  	    C++ function that was called in read.R but not defined.
+	  - R/read.R: Remove an _ in the readASCII C++ functions to match the
+	    naming convention of the other nearby functions.
+          - man/readASCII.Rd: Add examples of ascii export/import of messages.
+	  - inst/unitTests/runit.addressbook.R: Add tests of ascii
+	    export/import of messages.
+
+2011-07-07  Dirk Eddelbuettel  <edd@debian.org>
+
+	* src/wrapper_FileDescriptor.cpp (rprotobuf): Applied patch by Murray
+	to correct a cut & paste error in variable name
+
 2011-04-12  Dirk Eddelbuettel  <edd@debian.org>
 
 	* DESCRIPTION: Release 0.2.3

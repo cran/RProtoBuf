@@ -29,3 +29,13 @@ test.personOne <- function() {
     checkEquals(book$person[[2]]$phone[[1]]$number, "+01...",            msg="Second person phone number")
     checkEquals(book$person[[2]]$phone[[1]]$type,   0,                   msg="Second person phone number")
 }
+
+test.ascii <- function() {
+    # Output in text format to a temporary file
+    out.file <- tempfile()
+    writeLines( as.character(book), file(out.file))
+
+    # Verify we can read back in the message from a text file.
+    book2 <- readASCII( tutorial.AddressBook, file(out.file, "rb"))
+    checkEquals(as.character(book), as.character(book2) )
+}
