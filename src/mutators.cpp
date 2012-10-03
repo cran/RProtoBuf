@@ -151,10 +151,22 @@ uint64 GET_uint64( SEXP x, int index ){
 bool GET_bool( SEXP x, int index ){
 	switch( TYPEOF(x) ){
 		case INTSXP: 
+            if (INTEGER(x)[index] == R_NaInt) {
+                throwException( "NA boolean values not supported by RProtoBuf",
+                                "CastException" ) ;
+            }
 			return( (bool)INTEGER(x)[index] );
 		case REALSXP: 
+            if (REAL(x)[index] == R_NaReal) {
+                throwException( "NA boolean values not supported by RProtoBuf",
+                                "CastException" ) ;
+            }
 			return( (bool)REAL(x)[index] );
 		case LGLSXP:
+            if (LOGICAL(x)[index] == NA_LOGICAL) {
+                throwException( "NA boolean values not supported by RProtoBuf",
+                                "CastException" ) ;
+            }
 			return( (bool)LOGICAL(x)[index] );
 		case RAWSXP:
 			return( (bool)RAW(x)[index] ) ;
@@ -245,7 +257,7 @@ Rboolean allAreRaws( SEXP x) {
 void CHECK_values_for_enum( GPB::FieldDescriptor* field_desc, SEXP value ){
 	
 	const GPB::EnumDescriptor* enum_desc = field_desc->enum_type() ;
-    
+	// N.B. n undefined if TYPEOF(value) not a vector, but we catch that below.
 	int n = LENGTH(value) ;
 	
     switch( TYPEOF( value ) ){
@@ -377,7 +389,7 @@ PRINT_DEBUG_INFO( "value", value ) ;
 		// {{{ repeated fields
 		
 		// {{{ preliminary checks
-		int value_size = LENGTH(value);
+		int value_size = Rf_isVector(value) ? LENGTH(value) : 1;
 		// if the R type is RAWSXP and the cpp type is string or bytes, 
 		// then value_size is actually one because the raw vector
 		// is converted to a string
@@ -398,7 +410,7 @@ PRINT_DEBUG_INFO( "value", value ) ;
 			}
 		}
 		// }}}
-		
+		// The number of elements already in the repeated field.
 		int field_size = ref->FieldSize( *message, field_desc ) ;
 		
 		/* {{{ in case of messages or enum, we have to check that all values
@@ -981,6 +993,9 @@ PRINT_DEBUG_INFO( "value", value ) ;
 		// }}}
 	} else {
 		// {{{ non repeated fields
+		if (Rf_isVector(value) && LENGTH(value) > 1) {
+			throwException( "cannot set non-repeated field to vector of length > 1", "CastException" ) ;
+		}
 		switch( GPB::FieldDescriptor::TypeToCppType( field_desc->type() ) ){
 			// {{{ simple cases using macro expansion
 #undef HANDLE_SINGLE_FIELD

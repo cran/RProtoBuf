@@ -1,3 +1,69 @@
+2012-10-03  Murray Stokely  <murray@FreeBSD.org>
+
+	* src/mutators.cpp (rprotobuf): Fix bug where LENGTH() is used on
+	  non-vectors when setting a repeated message field to a single
+	  Message object.  This caused non-deterministic behavior after
+	  memory was read from a random location.
+	* inst/unitTests/runit.golden.message.R (test.repeatedFields): Add
+	  tests for this case.
+
+2012-09-25  Dirk Eddelbuettel  <edd@debian.org>
+
+	* man/is_extension.Rd: Use \dontrun on examples as we cannot reload
+	the same proto file twice
+	* man/label.Rd: Idem
+	* man/number.Rd: Idem
+	* man/type.Rd: Idem
+
+2012-09-24  Murray Stokely  <murray@FreeBSD.org>
+
+	* R/has.R: Distinguish between non-existant and not-set fields in
+	  a message by returning NULL in the former case.
+	* R/00classes.R: Idem
+	* src/wrapper_Message.cpp (rprotobuf): Idem
+	* inst/unitTests/runit.golden.message.R (test.has): Add test.
+	* man/has.Rd: Add example of the above.
+
+2012-09-21  Murray Stokely  <murray@FreeBSD.org>
+
+	* Fix a bug causing segfaults in containing_type().
+	* R/containing_type.R: Return NULL instead of invalid descriptors
+	when there is no containing type for an object.
+	* src/S4_classes.h: Check for NULL pointers in the contructors for
+	S4_Descriptor and S4_EnumDescriptor as these methods are called on
+	the return value of e.g. containing_type() in the protobuf API
+	without checking the return alue.
+	* man/containing_type-methods.Rd: Add examples section showing
+	cases where there is and is not a containing_type.
+	* inst/unitTests/runit.FieldDescriptor.R
+	(test.FieldDescriptor.class): Add tests for the above.
+
+2012-08-21  Murray Stokely  <murray@FreeBSD.org>
+
+	* src/mutators.cpp: Add better input checking when setting an
+	optional field to avoid an uncaught exception that would kill the
+	R session, and add a test.
+	* inst/unitTests/runit.golden.message.R (test.invalidAssignments):
+	Add test for this.
+
+2012-08-18  Dirk Eddelbuettel  <edd@debian.org>
+
+	* Applied two more patches by Murray and Karl:
+	  - Make readASCII() more robust to error conditions; adds tests to
+	    catch them.
+	  - Correct type(), cpp_type(), and label() methods when
+	    as.string=TRUE; add unit tests for these methods, add examples to
+	    the Rd files for these methods, and adds type and cpp_type to the
+	    NAMESPACE file where they were previously absent.
+
+2012-08-09  Dirk Eddelbuettel  <edd@debian.org>
+
+	* Applied two more patches by Murray:
+	  - R/wrapper_FieldDescriptor.R: correct more '_' and '__' mismatches
+	  - man/*: update manual pages for style, add examples
+	  - src/mutators.cpp: fix bug in handling of NA in boolean vectors
+	  - inst/unitTests/runit.golden.message.R: add unit test
+
 2012-08-08  Dirk Eddelbuettel  <edd@debian.org>
 
  	* DESCRIPTION: Release 0.2.5
@@ -13,7 +79,7 @@
 
 	* /man/add.Rd: Add patch by Murray for stylistic improvement and
 	added examples
-	
+
 	* inst/NEWS.Rd: Converted NEWS file to .Rd format
 
 	* DESCRIPTION: Changed Maintainer: to single person per CRAN Policy

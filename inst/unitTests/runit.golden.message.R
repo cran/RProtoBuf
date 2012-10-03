@@ -61,8 +61,54 @@ test.repeatedFields <- function(){
 	test$add("repeated_int32", c(1:5))
 	checkEquals(test$repeated_int32, c(1:5))
 
+	test$repeated_int32 <- 1
+	checkEquals(test$repeated_int32, 1)
+
         # Prior to RProtoBuf v0.2.5, this was not handled properly.
         test.2 <- new(protobuf_unittest.TestAllTypes,
                       repeated_string=c("foo", "bar"))
         checkEquals(test.2$repeated_string, c("foo", "bar"))
+
+        # Versions of RProtoBuf <= 0.2.5 had non-deterministic behavior due to a
+        # memory management bug when setting a repeated field to a
+        # non-vector type (e.g. a Message).
+	test$repeated_foreign_message <- list(new(protobuf_unittest.ForeignMessage,
+						  c = 1),
+					      new(protobuf_unittest.ForeignMessage,
+						  c = 2))
+	checkEquals(length(test$repeated_foreign_message), 2)
+	test$repeated_foreign_message <- new(protobuf_unittest.ForeignMessage,
+					     c = 3)
+	checkEquals(length(test$repeated_foreign_message), 1)
+}
+
+test.repeated.bools <- function() {
+	test <- new(protobuf_unittest.TestAllTypes)
+        test$add("repeated_bool", c(TRUE, FALSE))
+        checkEquals(test$repeated_bool, c(TRUE, FALSE))
+
+        test$add("repeated_bool", as.integer(c(TRUE, FALSE)))
+        test$add("repeated_bool", as.numeric(c(TRUE, FALSE)))
+
+        checkEquals(test$repeated_bool, rep(c(TRUE, FALSE), 3))
+
+        # Verify that we don't silently cast NA into TRUE or FALSE.
+        checkException(test$add("repeated_bool"), c(TRUE, FALSE, NA))
+}
+
+# Versions of RProtoBuf <= 0.2.5 would terminate the R instance with unhandled Rcpp exceptions.
+test.invalidAssignments <- function(){
+	test <- new(protobuf_unittest.TestAllTypes)
+	checkException(test$optional_int32 <- 1:10)
+}
+
+# Versions of RProtoBuf <= 0.2.5 did not distinguish between non-existant
+# and not-set fields with has().
+test.has <- function(){
+	test <- new(protobuf_unittest.TestAllTypes)
+	test$add("repeated_int32", c(1:5))
+	checkTrue( has(test, "repeated_int32"))
+	checkTrue( test$has("repeated_int32"))
+	checkTrue( is.null(test$has("nonexistant")))
+	checkTrue( !test$has("optional_int32"))
 }
