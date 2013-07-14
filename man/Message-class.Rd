@@ -17,6 +17,10 @@
 \alias{==,Message,Message-method}
 \alias{!=,Message,Message-method}
 \alias{all.equal,Message,Message-method}
+\alias{getExtension,Message-method}
+\alias{setExtension,Message-method}
+\alias{getExtension}
+\alias{setExtension}
 
 \title{Class "Message" }
 \description{
@@ -55,6 +59,10 @@ as an external pointer.
     \item{length}{\code{signature(x = "Message")}: The number of fields actually contained in the message. 
     A field counts in these two situations: the field is repeated and the field size is greater than 0, 
     the field is not repeated and the message has the field.}
+    \item{setExtension}{\code{signature(object = "Message")}: set an
+      extension field of the Message.}
+    \item{getExtension}{\code{signature(object = "Message")}: get the
+      value of an extension field of the Message.}
     \item{str}{\code{signature(object = "Message")}: displays the structure of the message }
     \item{identical}{\code{signature(x = "Message", y = "Message")}: Test if two messages are exactly identical }
     \item{==}{\code{signature(e1 = "Message", e2 = "Message")}: Same as \code{identical} }
@@ -78,6 +86,9 @@ proto.file <- system.file( "proto", "addressbook.proto", package = "RProtoBuf" )
 
 # reading a proto file and creating the descriptor
 Person <- P( "tutorial.Person", file = proto.file )
+}
+\dontshow{ Person <- P("tutorial.Person") }
+
 PhoneNumber <- P( "tutorial.Person.PhoneNumber" )
 
 # creating a prototype message from the descriptor
@@ -128,6 +139,5 @@ serialize( book, NULL )
 m <- tutorial.AddressBook$read( tf )
 writeLines( as.character( m ) )
 sapply( m$person, function(p) p$name )
-}
 }
 \keyword{classes}

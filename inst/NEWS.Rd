@@ -2,7 +2,28 @@
 \title{News for Package \pkg{RProtoBuf}}
 \newcommand{\cpkg}{\href{http://CRAN.R-project.org/package=#1}{\pkg{#1}}}
 
-\section{Changes in version 0.2.6 (2012-10-04)}{
+\section{Changes in RProtoBuf version 0.3 (2013-07-13)}{
+  \itemize{
+    \item Added support for Protocol Buffer extensions through the new
+      getExtension and setExtension methods for Message objects, and added
+      top-level extensions to the descriptor pool.
+    \item Added more user-friendly \code{show()} methods for Messages,
+      Descriptors, and other RProtoBuf objects.  A common source of
+      confusion on the mailing lists is to confuse Messages and
+      Descriptors.  The new \code{show()} methods succinctly display more
+      information about e.g. the number of set fields in a message to
+      make it a little clearer to users what type of object they are
+      working with.
+   \item Added has method for EnumDescriptor objects to test existance
+     of a named constant in an enumeration, and fix a bug in the length
+     method for these objects.
+   \item Added a number method for EnumValueDescriptor objects to
+     return the number of a named enumeration constant directly.
+   \item Improved documentation and unit tests.
+  }
+}
+
+\section{Changes in RProtoBuf version 0.2.6 (2012-10-04)}{
   \itemize{
     \item Applied several more patches by Murray to
     \itemize{
@@ -22,7 +43,7 @@
   }
 }
 
-\section{Changes in version 0.2.5 (2012-08-08)}{
+\section{Changes in RProtoBuf version 0.2.5 (2012-08-08)}{
   \itemize{
     \item Applied patches by Murray to
     \itemize{
@@ -36,7 +57,7 @@
     \item Moved inst/doc/ to vignettes/ per newer CRAN Policy
   }
 }
-\section{Changes in version 0.2.4 (2012-05-15)}{
+\section{Changes in RProtoBuf version 0.2.4 (2012-05-15)}{
   \itemize{
     \item Applied several patches kindly supplied by Murray Stokely to
     \itemize{
@@ -48,7 +69,7 @@
     \item Made small improvements to the startup code
   }
 }
-\section{Changes in version 0.2.3 (2011-04-12)}{
+\section{Changes in RProtoBuf version 0.2.3 (2011-04-12)}{
   \itemize{
     \item Protect UINT64 and INT64 with '#ifdef RCPP_HAS_LONG_LONG' which
     itself is valid with either g++ <= 4.4, or newer versions if the 
@@ -58,7 +79,7 @@
     target
   }
 }
-\section{Changes in version 0.2.2 (2011-01-11)}{
+\section{Changes in RProtoBuf version 0.2.2 (2011-01-11)}{
   \itemize{
     \item Applied two patches by Murray Stokely which
     \itemize{
@@ -73,18 +94,18 @@
     }
   }
 }
-\section{Changes in version 0.2.1 (2010-10-18)}{
+\section{Changes in RProtoBuf version 0.2.1 (2010-10-18)}{
   \itemize{
     \item Support for raw bytes added thanks to a patch by Koert Kuipers
   }
 }
-\section{Changes in version 0.2.0 (2010-09-10)}{
+\section{Changes in RProtoBuf version 0.2.0 (2010-09-10)}{
   \itemize{
     \item Second release with numerous internal changes made possible by
     changes in Rcpp
   }
 }
-\section{Changes in version 0.1-0 (2010-02-01)}{
+\section{Changes in RProtoBuf version 0.1-0 (2010-02-01)}{
   \itemize{
     \item Initial CRAN release
   }

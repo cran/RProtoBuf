@@ -16,6 +16,10 @@ test.size <- function() {
     checkEquals(bytesize(book$person[[1]]), 60,  msg="Bytes of first person message")
 }
 
+test.fileDescriptor <- function() {
+    checkEquals(name(book$fileDescriptor()), "addressbook.proto")
+}
+
 test.personOne <- function() {
     checkEquals(book$person[[1]]$name,              "Romain Francois",   msg="First person name")
     checkEquals(book$person[[2]]$name,              "Dirk Eddelbuettel", msg="First person name")
@@ -45,10 +49,10 @@ test.ascii <- function() {
 
     # Verify that we get an exception if we try to read from a text connection.
     # (better than silently getting an empty proto.)
-    book4 <- checkException( readASCII( tutorial.AddressBook, file(out.file, "rt"))
+    book4 <- checkException( readASCII( tutorial.AddressBook, file(out.file, "rt")))
 
     # Verify that we get an exception if the file is not readable.
-    old.mode <- file.info(out.file)[["mode"]])
+    old.mode <- file.info(out.file)[["mode"]]
     Sys.chmod(out.file, "0000")
     book5 <- checkException( readASCII( tutorial.AddressBook, file(out.file, "rb")))
     # Set the permissions back to ensure the file is cleaned up properly.

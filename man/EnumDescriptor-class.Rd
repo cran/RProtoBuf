@@ -3,6 +3,7 @@
 \docType{class}
 \alias{EnumDescriptor-class}
 \alias{show,EnumDescriptor-method}
+\alias{has,EnumDescriptor-method}
 \alias{as.character,EnumDescriptor-method}
 \alias{toString,EnumDescriptor-method}
 \alias{$,EnumDescriptor-method}
@@ -42,12 +43,14 @@ Objects of this class are typically retrieved as members of
     \item{toString}{\code{signature(x = "EnumDescriptor")}: same as \code{as.character} }
     \item{$}{\code{signature(x = "EnumDescriptor")}: get the 
       number associated with the name}
+    \item{has}{\code{signature(object = "EnumDescriptor")}: indicate if
+      the given name is a constant present in this enum.}
     \item{containing_type}{\code{signature(object = "EnumDescriptor")} : returns a \linkS4class{Descriptor} of the message type that contains this enum descriptor, or NULL if this is a top level enum descriptor.}
     \item{length}{\code{signature(x = "EnumDescriptor")} : number of constants in this enum.}
     \item{value_count}{\code{signature(object = "EnumDescriptor")} : number of constants in this enum.}
     \item{value}{\code{signature(object = "EnumDescriptor")} : extracts an \linkS4class{EnumValueDescriptor}.
       Exactly one argument of \code{index}, \code{number} or \code{name} has to be 
-      used. 
+      used.
       If \code{index} is used, the enum value descriptor is retrieved
       by position, using the \code{value} method of the C++ class. 
       If \code{number} is used, the enum value descripror is retrieved
@@ -70,9 +73,17 @@ proto.file <- system.file( "proto", "addressbook.proto", package = "RProtoBuf" )
 
 # reading a proto file and creating the descriptor
 Person <- P( "tutorial.Person", file = proto.file )
-
+}
+\dontshow{Person <- P("tutorial.Person") }
 # enum type
 Person$PhoneType
-}
+
+has(Person$PhoneType, "MOBILE")
+has(Person$PhoneType, "HOME")
+has(Person$PhoneType, "WORK")
+
+has(Person$PhoneType, "FOOBAR")
+
+length(Person$PhoneType)
 }
 \keyword{classes}

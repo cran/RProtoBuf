@@ -2,7 +2,7 @@
 #
 # RProtoBuf configure.in by Dirk Eddelbuettel <edd@debian.org>
 #
-# $Id: configure.in 443 2012-05-14 01:46:37Z edd $
+# $Id: configure.in 502 2013-07-13 03:46:14Z murray $
 
 # require at least autoconf 2.61
 AC_PREREQ(2.61)
@@ -15,6 +15,7 @@ AC_LANG(C++)
 AC_REQUIRE_CPP
 AC_PROG_CC
 AC_PROG_CXX
+
 ## simpler alternative to test below:  AC_PATH_PROG(PROTOC, protoc)
 
 AC_DEFUN([AC_PROG_PKGCONFIG], [AC_CHECK_PROG(PKGCONFIG,pkg-config,yes)])
@@ -24,7 +25,11 @@ AC_PROG_PKGCONFIG
 ##
 protobuf_cxxflags=`pkg-config --cflags protobuf`
 protobuf_libs=`pkg-config --libs protobuf`
-    
+
+## And make sure these flags are used for the tests below.
+CPPFLAGS="${protobuf_cxxflags} ${CPPFLAGS}"
+CXXFLAGS="${protobuf_cxxflags} ${CXXFLAGS}"
+
 ## look for protoc, the ProtoBuf compiler
 AC_DEFUN([AC_PROG_PROTOC], [AC_CHECK_PROG(PROTOC,protoc,yes)])
 AC_PROG_PROTOC

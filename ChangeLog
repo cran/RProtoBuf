@@ -1,3 +1,112 @@
+2013-07-14  Dirk Eddelbuettel  <edd@debian.org>
+
+	* inst/unitTests/runit.extensions.R (test.extension): Comment-out
+	test for setExtension against enum, at least for now
+
+	* vignettes/RProtoBuf/RProtoBuf.Rnw: Added Murray to Authors, at last
+	* vignettes/RProtoBuf-unitTests.Rnw: Idem
+	* vignettes/RProtoBuf-quickref/RProtoBuf-quickref.Rnw: Idem
+
+2013-07-13  Murray Stokely  <murray@FreeBSD.org>
+
+	* inst/NEWS.Rd: Summarize new features since the last CRAN release
+          last year.
+	* DESCRIPTION: Increment version to 0.3.
+
+2013-07-13  Dirk Eddelbuettel  <edd@debian.org>
+
+	* man/Message-class.Rd: Added \alias entries for getExtension and
+	setExtension
+	* DESCRIPTION: Incremented Version to separate current test builds
+	from previous release
+	* DESCRIPTION: Removed 'MinimumLibProtoVersion: 2002000' which we
+	no longer need as that version of Protocol Buffers was released a
+	rather long time ago
+	* R/zzz.R: Check for minimal version is now commented-out
+
+2013-07-12  Murray Stokely  <murray@FreeBSD.org>
+
+	* src/extensions.cpp: Replace custom extractor and mutator with
+	  call to existing functions in mutators.cpp and extractors.cpp that
+	  can be used for extensions and any other field type.
+	* src/extensions.R: Idem
+	* vignettes/RProtoBuf/RProtoBuf.Rnw: Document getExtension,
+	  setExtension methods.
+	* man/Message-class.Rd: Idem
+	* src/rprotobuf.h: Remove unused desc argument to
+	  extractFieldAsSEXP.
+	* src/extractors.cpp: Idem
+	* inst/unitTests/runit.extensions.R: Add additional tests for
+	  nested enum and message type extensions.
+
+2013-07-11  Murray Stokely  <murray@FreeBSD.org>
+
+	* R/extensions.R: Implement getExtension, setExtension methods.
+	* src/extensions.cpp: Implement getExtension, setExtension.
+	* R/set.R: Add a TODO noting these functions are undocumented.
+	* R/00classes.R: Add setExtension, getExtension extractors for
+	  message objects.
+	* R/completion.R: Add setExtension, getExtension.
+	* NAMESPACE: Add setExtension, getExtension.
+	* src/DescriptorPoolLookup.cpp: Add top-level
+	  extensions to descriptor pool.
+	* src/rprotobuf.h: Add helper function for getting field
+	  descriptor objects.
+	* src/wrapper_FileDescriptor.cpp: Add support for
+	  extensions to getMemberNames and as_list
+	* src/lookup.cpp: Add support for looking up extensions.
+	* inst/unitTests/runit.extensions.R: Add basic test for the above.
+
+2013-07-10  Murray Stokely  <murray@FreeBSD.org>
+
+	* man/aslist.Rd: Document behavior for enum and file descriptors
+	  and be more sparing with \dontrun in examples.
+	* man/EnumDescriptor-class.Rd: Be more sparing with \dontrun in
+	  examples so we run more test code.
+	* man/add.Rd: Idem
+	* man/clone.Rd: Idem
+	* man/Descriptor-class.Rd: Idem
+	* man/FieldDescriptor-class.Rd: Idem
+	* man/FileDescriptor-class.Rd: Idem
+	* man/is_extension.Rd: Idem
+	* man/label.Rd: Idem
+	* man/Message-class.Rd: Idem
+	* man/number.Rd: Idem
+	* man/P.Rd: Idem
+	* man/readProtoFiles.Rd: Idem
+	* man/type.Rd: Idem
+	* man/with.Rd: Idem
+	* man/RProtoBuf-package.Rd: Idem
+
+2013-07-08  Murray Stokely  <murray@FreeBSD.org>
+
+	* R/has.R: add a has method for EnumDescriptor objects to return a
+	  logical indicating if the named constant exists or not.
+	* R/00classes.R: fix a typo that prevented the length method from
+	  working properly for EnumDescriptor objects.  Use this
+	  functionality to add the number of constants in the show method
+	  for EnumDescriptors.
+	* R/wrapper_EnumValueDescriptor.R: add a number method to return
+	  the numeric value of this enum constant.
+	* man/has.Rd: Add example of the above.
+	* man/number.Rd: Add example of the above.
+	* man/EnumDescriptor-class.Rd: Add example of the above.
+	* man/EnumValueDescriptor-class.Rd: Add example of the above.
+
+2013-02-21  Murray Stokely  <murray@FreeBSD.org>
+
+	* R/00classes.R: add filename and package slots to FileDescriptor
+	  S4 class and provide more user-friendly show() methods for
+	  Messages and FileDescriptors that provide more context about the
+	  contained data.
+	* src/S4_classes.h: populate package and filename slots when a
+	  FileDescriptor is created based on fields from the underlying
+	  C++ object.
+	* inst/unitTests/runit.addressbook.R: add a basic test for
+	  FileDescriptors.
+	* man/FileDescriptor-class.Rd: document the new slots in
+	  FileDescriptor and add examples.
+
 2012-10-03  Murray Stokely  <murray@FreeBSD.org>
 
 	* src/mutators.cpp (rprotobuf): Fix bug where LENGTH() is used on
