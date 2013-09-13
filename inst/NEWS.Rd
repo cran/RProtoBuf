@@ -2,6 +2,28 @@
 \title{News for Package \pkg{RProtoBuf}}
 \newcommand{\cpkg}{\href{http://CRAN.R-project.org/package=#1}{\pkg{#1}}}
 
+% TODO(edd): Update date and version number.
+\section{Changes in RProtoBuf version 0.3.1 (2013-09-13)}{
+  \itemize{
+    \item Added support for setting and getting 64-bit integer types as
+      character strings of decimal integers to work around R's lack of
+      native 64-bit integer types.
+    \item Added better error handling, documentation, and tests to the
+      extensions support (getExtension and setExtension).
+      \item Add support to P for returning extension descriptors.
+    \item Improved error messages to include field names when invalid
+    fields are specified to protocol buffer messages with new, update, etc.
+    \item Improved configure to detect and pass -std=c++0x if it is
+    available to enable long long 64-bit integer support in Rcpp.
+    \item Improved configure in the case when pkg-config is not
+    available or does not know about the google protocol buffer
+    includes.
+    \item Replaced newly deprecated Rcpp macros with a simplified macro
+    functionality to avoid warnings on the latest development version of
+    Rcpp.
+  }
+}
+
 \section{Changes in RProtoBuf version 0.3 (2013-07-13)}{
   \itemize{
     \item Added support for Protocol Buffer extensions through the new

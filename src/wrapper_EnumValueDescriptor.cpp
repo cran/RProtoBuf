@@ -20,25 +20,26 @@
 // along with RProtoBuf.  If not, see <http://www.gnu.org/licenses/>.
 
 #include "rprotobuf.h"
+#include "RcppMacros.h"
 
 namespace rprotobuf{
 
 #undef METHOD
 #define METHOD(__NAME__) RCPP_PP_CAT(EnumValueDescriptor__,__NAME__)
 
-RCPP_XP_METHOD_0( METHOD(as_character) , GPB::EnumValueDescriptor , DebugString) ;
+RPB_XP_METHOD_0( METHOD(as_character) , GPB::EnumValueDescriptor , DebugString) ;
 
-RCPP_FUNCTION_1(S4_Message, METHOD(as_Message) , Rcpp::XPtr<GPB::EnumValueDescriptor> d ){
+RPB_FUNCTION_1(S4_Message, METHOD(as_Message) , Rcpp::XPtr<GPB::EnumValueDescriptor> d ){
 	GPB::EnumValueDescriptorProto* message = new GPB::EnumValueDescriptorProto() ; 
 	d->CopyTo( message ); 
 	return S4_Message(message) ;
 }
 		
-RCPP_FUNCTION_2( std::string, METHOD(name), Rcpp::XPtr<GPB::EnumValueDescriptor> d, bool full) {
+RPB_FUNCTION_2( std::string, METHOD(name), Rcpp::XPtr<GPB::EnumValueDescriptor> d, bool full) {
 	return full ? d->full_name() : d->name() ;
 }
 
-RCPP_FUNCTION_1( int, METHOD(number), Rcpp::XPtr<GPB::EnumValueDescriptor> d) {
+RPB_FUNCTION_1( int, METHOD(number), Rcpp::XPtr<GPB::EnumValueDescriptor> d) {
         return d->number() ;
 }
 

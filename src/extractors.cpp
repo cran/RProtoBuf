@@ -23,7 +23,32 @@
 #include "Rcppsupport.h"
 
 namespace rprotobuf{
-	
+
+const char * kIntStringOptionName = "RProtoBuf.int64AsString";
+bool UseStringsForInt64() {
+    static const SEXP option_name = Rf_install(kIntStringOptionName);
+    return (Rf_asLogical(Rf_GetOption1(option_name)));
+}
+
+// Rcpp::wrap silently coerces 64-bit integers to numerics
+// which drop precision for values between 2^53 - 2^64.
+// So, if an option is set, we return as a character string.
+template<typename ValueType>
+SEXP Int64AsSEXP(ValueType value) {
+    if (UseStringsForInt64()) {
+        std::stringstream ss;
+        if ((ss << value).fail()) {
+            // This should not happen, its a bug in the code.
+            string message = string("Error converting int64 to string, unset ") +
+                    kIntStringOptionName + " option.";
+            throwException(message.c_str(), "ConversionException");
+		}
+        return Rcpp::CharacterVector(ss.str());
+    } else {
+        return Rcpp::wrap(value);
+    }
+}
+
 /**
  * extract a field from a message
  *
@@ -71,15 +96,33 @@ SEXP extractFieldAsSEXP( const Rcpp::XPtr<GPB::Message>& message,
 
 			HANDLE_REPEATED_FIELD(CPPTYPE_INT32, GPB::int32) ;
     		HANDLE_REPEATED_FIELD(CPPTYPE_UINT32, GPB::uint32) ;
-#ifdef RCPP_HAS_LONG_LONG_TYPES
-    		HANDLE_REPEATED_FIELD(CPPTYPE_INT64, GPB::int64) ;
-    		HANDLE_REPEATED_FIELD(CPPTYPE_UINT64, GPB::uint64) ;
-#endif
     		HANDLE_REPEATED_FIELD(CPPTYPE_DOUBLE, double) ;
     		HANDLE_REPEATED_FIELD(CPPTYPE_FLOAT, float) ;
     		HANDLE_REPEATED_FIELD(CPPTYPE_BOOL, bool) ;
     		HANDLE_REPEATED_FIELD(CPPTYPE_ENUM, enum_field ) ;
     		HANDLE_REPEATED_FIELD(CPPTYPE_MESSAGE, message_field ) ;
+#ifdef RCPP_HAS_LONG_LONG_TYPES
+            // We can't handle these the same way, because Rcpp::wrap silently
+            // casts int64s to doubles which may cause us to lose precision.
+            case CPPTYPE_INT64:
+                if (UseStringsForInt64()) {
+                    return Rcpp::wrap(
+                        Int64AsStringRepeatedFieldImporter(ref, *message,
+                                                           fieldDesc));
+                } else {
+                    return Rcpp::wrap(
+                        RepeatedFieldImporter<int64>(ref, *message, fieldDesc));
+                }
+            case CPPTYPE_UINT64:
+                if (UseStringsForInt64()) {
+                    return Rcpp::wrap(
+                        UInt64AsStringRepeatedFieldImporter(ref, *message,
+                                                            fieldDesc));
+                } else {
+                    return Rcpp::wrap(
+                        RepeatedFieldImporter<uint64>(ref, *message, fieldDesc));
+                }
+#endif
 #undef HANDLE_REPEATED_FIELD
 
 		case CPPTYPE_STRING:
@@ -112,13 +155,17 @@ SEXP extractFieldAsSEXP( const Rcpp::XPtr<GPB::Message>& message,
 
 		HANDLE_SINGLE_FIELD( CPPTYPE_INT32,  Int32 ); 
 		HANDLE_SINGLE_FIELD( CPPTYPE_UINT32, UInt32 ); 
-#ifdef RCPP_HAS_LONG_LONG_TYPES
-		HANDLE_SINGLE_FIELD( CPPTYPE_INT64,  Int64 );
-		HANDLE_SINGLE_FIELD( CPPTYPE_UINT64, UInt64 );
-#endif
 		HANDLE_SINGLE_FIELD( CPPTYPE_DOUBLE, Double );
 		HANDLE_SINGLE_FIELD( CPPTYPE_FLOAT, Float );
 		HANDLE_SINGLE_FIELD( CPPTYPE_BOOL, Bool );
+#ifdef RCPP_HAS_LONG_LONG_TYPES
+        // Handle these types separately since Rcpp::wrap doesn't
+        // do the right thing.
+        case CPPTYPE_INT64:
+            return Int64AsSEXP<int64>(ref->GetInt64(*message, fieldDesc));
+        case CPPTYPE_UINT64:
+            return Int64AsSEXP<uint64>(ref->GetUInt64(*message, fieldDesc));
+#endif
 #undef HANDLE_SINGLE_FIELD
 
 		case CPPTYPE_STRING:
@@ -146,4 +193,3 @@ SEXP extractFieldAsSEXP( const Rcpp::XPtr<GPB::Message>& message,
 }
 
 } // namespace rprotobuf
-

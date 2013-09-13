@@ -1,3 +1,93 @@
+2013-09-13  Dirk Eddelbuettel  <edd@debian.org>
+
+	* DESCRIPTION (Version): Release 0.3.1
+
+2013-09-13  Murray Stokely  <murray@FreeBSD.org>
+
+	* vignettes/Makefile.in: Update configure to output R_HOME to the
+	  vignette makefile so we can avoid the use of a non-portable GNU
+	  makefile extension here.
+
+2013-09-12  Murray Stokely  <murray@FreeBSD.org>
+
+	* src/RcppMacros.h: Add Rcpp compatibility macros
+	  which are simplified versions of the now deprecated ones from
+	  Rcpp.
+
+2013-09-11  Murray Stokely  <mstokely@FreeBSD.org>
+
+	* configure.in: If pkg-config is not available add -lprotobuf to
+	  PKG_LIBS.  This makes it easier to install on MacOS X 10.8, for
+	  example.
+
+2013-09-06  Murray Stokely  <murray@FreeBSD.org>
+
+	* src/rprotobuf.cpp (rprotobuf): Include the name of the field
+	  that could not be found in exceptions in getFieldDescriptor
+	  (errors from update / new, etc.).
+
+2013-09-03  Murray Stokely  <murray@FreeBSD.org>
+
+	* inst/NEWS.Rd: Summarize changes since the last release.
+	* vignettes/RProtoBuf/RProtoBuf.Rnw: Add a new section on 64-bit
+	  issues, document the RProtoBuf.int64AsString option, break out the
+	  'other approaches' section from the 'future work', and fix a few
+	  typos.
+
+2013-08-30  Dirk Eddelbuettel  <edd@debian.org>
+
+	* NAMESPACE: Import 'file_path_as_absolute' from package tools, and
+	  the two functions needed from the RCurl package
+	* R/*R: Updated several files which no longer need 'tools:::' prefix
+	* DESCRIPTION: Updated Depends: and Imports accordingly
+
+2013-08-29  Murray Stokely  <murray@FreeBSD.org>
+
+	* R/zzz.R (.onLoad): Rename option controlling int64 handling with
+	  package name prefix.
+	* inst/unitTests/runit.int64.R (test.int64): Idem
+	* src/extractors.cpp (rprotobuf): Add templated function to reduce
+	  code duplication in last changelist.
+	* src/mutators.cpp (rprotobuf): Idem
+
+2013-08-27  Murray Stokely  <murray@FreeBSD.org>
+
+	* src/extractors.cpp (rprotobuf): Add support for a new
+	  option("int64AsString") that controls whether extractors for
+	  64-bit integer fields return character strings or use Rcpp's
+	  default wrap type which coerces to numeric, possibly losing
+	  precision.
+	* R/zzz.R (.onLoad): Initialize options("int64AsString" = FALSE).
+	* src/Rcppsupport.h (rprotobuf): Add RepeatedFieldImporter classes
+	  for int64 and uint64 that return strings instead of int64s.
+	* src/mutators.cpp (rprotobuf): Add support for setting int64
+	  fields as R character vectors that are converted to int64 or
+	  uint64 C++ types with std::stringstream.  This allows the user
+	  to get around the lack of 64-bit integer support in R when working
+	  interactively with RProtoBufs where a large precision number or
+	  identifier needs to be stored.
+	* inst/unitTests/runit.int64.R: Add tests for the above.
+
+2013-08-21  Murray Stokely  <murray@FreeBSD.org>
+
+	* inst/unitTests/runit.addressbook.R (test.ascii): Add more tests.
+	* src/wrapper_Descriptor.cpp (rprotobuf): Add better error
+	  handling for readASCII of text strings rather than returning
+	  an empty proto.
+	* R/extensions.R: Add checks to ensure that a valid extension
+	  FieldDescriptor is passed to getExtension and setExtension.
+	* inst/unitTests/runit.int64.R (test.int64): Add a test
+	  illustrating how RProtoBuf is broken in handling 64-bit integers
+	  (commented out for now).
+	* man/P.Rd: Document behavior for extensions.
+	* inst/unitTests/runit.extensions.R (test.extension): Add more tests.
+	* src/wrapper_Message.cpp (rprotobuf): Add function for returning
+	  the number of extensions set in this message, to improve show() output.
+	* src/rprotobuf.cpp (rprotobuf): Add support for looking up
+	  extensions by name and returning FieldDescriptors.
+	* R/00classes.R (P): Add support for returning extension
+	  descriptors.
+
 2013-07-14  Dirk Eddelbuettel  <edd@debian.org>
 
 	* inst/unitTests/runit.extensions.R (test.extension): Comment-out

@@ -20,6 +20,7 @@
 
 #include "rprotobuf.h" 
 #include "fieldtypes.h" 
+#include "RcppMacros.h"
 
 namespace rprotobuf{
 
@@ -99,6 +100,17 @@ int32 GET_int32( SEXP x, int index ){
 	return (int32)0 ; // -Wall, should not happen since we only call this when we know it works
 }
 
+template<typename ValueType>
+ValueType Int64FromString(const string &value) {
+    std::stringstream ss(value);
+    ValueType ret;
+    if ((ss >> ret).fail() || !(ss>>std::ws).eof()) {
+        string message = "Provided character value '" + value +
+                "' cannot be cast to 64-bit integer.";
+        throwException(message.c_str(), "CastException");
+    }
+    return ret;
+}
 
 int64 GET_int64( SEXP x, int index ){
 	switch( TYPEOF(x) ){
@@ -110,6 +122,8 @@ int64 GET_int64( SEXP x, int index ){
 			return( (int64)LOGICAL(x)[index] );
 		case RAWSXP:
 			return( (int64)RAW(x)[index] ) ;
+		case STRSXP:
+            return Int64FromString<int64>(CHAR(STRING_ELT(x, index)));
 		default:
 			throwException( "cannot cast SEXP to int64", "CastException" ) ; 
 	}
@@ -136,12 +150,14 @@ uint64 GET_uint64( SEXP x, int index ){
 	switch( TYPEOF(x) ){
 		case INTSXP: 
 			return( (uint64)INTEGER(x)[index] );
-		case REALSXP: 
+		case REALSXP:
 			return( (uint64)REAL(x)[index] );
 		case LGLSXP:
 			return( (uint64)LOGICAL(x)[index] );
 		case RAWSXP:
 			return( (uint64)RAW(x)[index] ) ;
+		case STRSXP:
+            return Int64FromString<uint64>(CHAR(STRING_ELT(x, index)));
 		default:
 			throwException( "cannot cast SEXP to uint64", "CastException" ) ; 
 	}
@@ -596,11 +612,12 @@ PRINT_DEBUG_INFO( "value", value ) ;
     		case TYPE_SINT64:
     		case TYPE_SFIXED64:
     			{
-    				switch( TYPEOF( value ) ){
-    					case INTSXP:
-    					case REALSXP:
-    					case LGLSXP:
-    					case RAWSXP:	
+					switch( TYPEOF( value ) ){
+						case INTSXP:
+						case REALSXP:
+						case LGLSXP:
+						case RAWSXP:
+						case STRSXP: // For int64, we support chars.
     						{
     							int i = 0;
 
@@ -664,7 +681,8 @@ PRINT_DEBUG_INFO( "value", value ) ;
 	   					case INTSXP:
     					case REALSXP:
     					case LGLSXP:
-    					case RAWSXP:	
+    					case RAWSXP:
+						case STRSXP: // For int64, we support chars.
     						{
     							
     							int i = 0;
@@ -1008,13 +1026,44 @@ PRINT_DEBUG_INFO( "value", value ) ;
 
 			HANDLE_SINGLE_FIELD( CPPTYPE_INT32, Int32, GPB::int32) ;
 			HANDLE_SINGLE_FIELD( CPPTYPE_UINT32, UInt32, GPB::uint32) ;
-#ifdef RCPP_HAS_LONG_LONG_TYPES
-			HANDLE_SINGLE_FIELD( CPPTYPE_INT64, Int64, GPB::int64) ;
-			HANDLE_SINGLE_FIELD( CPPTYPE_UINT64, UInt64, GPB::uint64) ;
-#endif
 			HANDLE_SINGLE_FIELD( CPPTYPE_DOUBLE, Double, double) ;
 			HANDLE_SINGLE_FIELD( CPPTYPE_FLOAT, Float, float) ;
 			HANDLE_SINGLE_FIELD( CPPTYPE_BOOL, Bool, bool) ;
+#ifdef RCPP_HAS_LONG_LONG_TYPES
+			case CPPTYPE_INT64 :
+				{
+					// TODO(mstokely) Rcpp::as<int64> of a STRSEXP
+					// should just work for strings representing
+					// int64s.
+					if (TYPEOF(value) == STRSXP) {
+						const string int64str = COPYSTRING(CHAR(
+							STRING_ELT(value, 0)));
+                        ref->SetInt64(message, field_desc,
+                                      Int64FromString<GPB::int64>(int64str));
+						break ;
+					} else {
+						ref->SetInt64( message, field_desc, Rcpp::as<GPB::int64>(value));
+						break;
+					}
+				}
+			case CPPTYPE_UINT64 :
+				{
+					// TODO(mstokely) Rcpp::as<int64> of a STRSEXP
+					// should just work for strings representing
+					// int64s.
+					if (TYPEOF(value) == STRSXP) {
+						const string int64str = COPYSTRING(CHAR(
+							STRING_ELT(value, 0)));
+                        ref->SetUInt64(message, field_desc,
+                                       Int64FromString<GPB::uint64>(int64str));
+						break ;
+					} else {
+						ref->SetUInt64(message, field_desc,
+									   Rcpp::as<GPB::uint64>(value));
+						break;
+					}
+				}
+#endif
 #undef HANDLE_SINGLE_FIELD
 			default:
 				throwException("Unsupported type", "ConversionException");
@@ -1123,7 +1172,7 @@ Rprintf( "</setMessageField>\n" ) ;
 	
 }
 
-RCPP_FUNCTION_VOID_2( update_message, Rcpp::XPtr<GPB::Message> message, Rcpp::List list ){
+RPB_FUNCTION_VOID_2( update_message, Rcpp::XPtr<GPB::Message> message, Rcpp::List list ){
 	Rcpp::CharacterVector names = list.attr( "names" ) ;
 	int n = list.size() ;
 	for( int i=0; i<n; i++){

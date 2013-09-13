@@ -1,5 +1,6 @@
 #include "rprotobuf.h"
 #include "DescriptorPoolLookup.h" 
+#include "RcppMacros.h"
 
 namespace rprotobuf{
 
@@ -81,6 +82,39 @@ Rf_PrintValue( type ) ;
 	}
 	
 	return( S4_Descriptor( desc ) ) ;
+}
+
+
+/**
+ * get the descriptor associated with an extension
+ *
+ * @param type message type
+ *
+ * @return an S4 object of class FieldDescriptor, or NULL if the type
+ *  is unknown
+ */
+SEXP getExtensionDescriptor( SEXP type ){
+#ifdef RPB_DEBUG
+Rprintf( "<getExtensionDescriptor>\n      type = " ) ;
+Rf_PrintValue( type ) ;
+#endif
+	
+	const char * typeName = CHAR( STRING_ELT(type, 0 ) ) ;
+	
+	/* first try the generated pool */
+	const GPB::DescriptorPool*  pool = GPB::DescriptorPool::generated_pool() ;
+	const GPB::FieldDescriptor*  desc = pool->FindExtensionByName( typeName ) ; 
+	if( !desc ){
+		/* then try the "runtime" pool" */
+		pool = DescriptorPoolLookup::pool() ;
+		desc = pool->FindExtensionByName( typeName ) ;
+		if( !desc ){
+			/* unlucky */
+			return R_NilValue ;
+		}
+	}
+	
+	return( S4_FieldDescriptor( desc ) ) ;
 }
 
 /**
@@ -189,6 +223,7 @@ Rprintf( "<isMessage>\n" ) ;
 GPB::FieldDescriptor* getFieldDescriptor(GPB::Message* message, SEXP name){
 	GPB::FieldDescriptor* field_desc = (GPB::FieldDescriptor*)0;
 	const GPB::Descriptor* desc = message->GetDescriptor() ;
+	std::string error_message = "could not get FieldDescriptor for field";
 	switch( TYPEOF(name) ){
 		case S4SXP:
 		  {
@@ -202,11 +237,13 @@ GPB::FieldDescriptor* getFieldDescriptor(GPB::Message* message, SEXP name){
 		case CHARSXP:
 			{
 				field_desc = (GPB::FieldDescriptor*)desc->FindFieldByName( CHAR(name) ) ;
-				break ;	
+				error_message = error_message + " '" + CHAR(name) + "'";
+				break ;
 			}
 		case STRSXP:
 			{
 				field_desc = (GPB::FieldDescriptor*)desc->FindFieldByName( CHAR( STRING_ELT(name, 0 ) ) ) ;
+				error_message = error_message + " '" + CHAR( STRING_ELT(name, 0 )) + "'";
 				break ;
 			}
 		case REALSXP:
@@ -217,20 +254,19 @@ GPB::FieldDescriptor* getFieldDescriptor(GPB::Message* message, SEXP name){
 			}
 	}
 	if( !field_desc ){
-		throwException( "could not get FieldDescriptor for field", "NoSuchFieldException" ) ;
+		throwException( error_message.c_str(), "NoSuchFieldException" ) ;
 	}
 	return field_desc ;
 }
 
-RCPP_FUNCTION_VOID_1( check_libprotobuf_version, int minversion ){
+RPB_FUNCTION_VOID_1( check_libprotobuf_version, int minversion ){
 	if( GOOGLE_PROTOBUF_VERSION < minversion ){
 		throw std::range_error( "The protobuf library you are using is too old for this package, please upgrade" ) ;
 	}
 }
 
-RCPP_FUNCTION_0(int, get_protobuf_library_version){
+RPB_FUNCTION_0(int, get_protobuf_library_version){
 	return GOOGLE_PROTOBUF_VERSION;
 }
 
 } // namespace rprotobuf
-
