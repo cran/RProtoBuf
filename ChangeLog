@@ -1,3 +1,51 @@
+2013-12-15  Dirk Eddelbuettel  <edd@debian.org>
+
+	* DESCRIPTION (Version): Release 0.3.2
+
+	* tests/runUnitTests.R: Minor rewrite and cleanup from doRUnit.R with
+	a tip of the hat to Murray's version in his HistogramTools package
+
+2013-12-14  Dirk Eddelbuettel  <edd@debian.org>
+
+	* src/lookup.cpp (rprotobuf): Descrictor pools attached directly
+	* R/lookup.R (attachDescriptorPool): No longer attach them here
+	* src/rprotobuf.h: Updated function declaration
+
+2013-12-14  Murray Stokely  <murray@FreeBSD.org>
+
+	* src/mutators.cpp (rprotobuf): Fix a bug which incorrectly
+	  prevented users from setting raw non-repeated fields under some
+	  circumstances.
+	* inst/unitTests/runit.bytes.R (test.all): Verify raw(10) can be
+	  set to required bytes fields to verify correct behavior for use
+	  case mentioned on rprotobuf-yada list.
+
+2013-11-13  Murray Stokely  <murray@FreeBSD.org>
+
+	* R/extensions.R: Give a user friendly error message if someone tries
+	  to set an extension to a message of the wrong type instead of
+	  causing a C++ check failure that terminates your R session.
+	* inst/unitTests/runit.extensions.R (test.extension): Add test.
+
+2013-10-23  Murray Stokely  <murray@FreeBSD.org>
+
+	* src/lookup.cpp (rprotobuf): Remove stop() error in object table
+	  assignment as this was causing errors with the '<<-' operator in
+	  any code using RProtoBuf.
+	* inst/unitTests/runit.import.R (test.assign.in.global): Add a
+	  test for the above.
+
+2013-09-16  Murray Stokely  <murray@FreeBSD.org>
+
+	* DESCRIPTION (Version): Increment to 0.3.1.1.
+	* R/00classes.R: Improve show method for EnumValueDescriptor and
+	  add enum_type to '$' dispatch.
+	* man/EnumValueDescriptor-class.Rd: Add examples and document
+	  missing methods.
+	* src/wrapper_EnumValueDescriptor.cpp (rprotobuf): Add missing
+	  enum_type method.
+	* inst/unitTests/runit.enums.R (test.enums): Add more tests.
+
 2013-09-13  Dirk Eddelbuettel  <edd@debian.org>
 
 	* DESCRIPTION (Version): Release 0.3.1
