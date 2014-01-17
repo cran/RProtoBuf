@@ -1,6 +1,4 @@
-// -*- mode: C++; c-indent-level: 4; c-basic-offset: 4; tab-width: 4 -*-
-/* :tabSize=4:indentSize=4:noTabs=false:folding=explicit:collapseFolds=1: */
-//
+// -*- indent-tabs-mode: nil; tab-width: 4; show-trailing-whitespace: t; c-indent-level: 4; c-basic-offset: 4; -*-
 // Copyright (C) 2010 - 2011  Dirk Eddelbuettel and Romain Francois
 //
 // This file is part of RProtoBuf.
@@ -22,9 +20,9 @@
 #include "fieldtypes.h"
 #include "Rcppsupport.h"
 
-namespace rprotobuf{
+namespace rprotobuf {
 
-const char * kIntStringOptionName = "RProtoBuf.int64AsString";
+const char* kIntStringOptionName = "RProtoBuf.int64AsString";
 bool UseStringsForInt64() {
     static const SEXP option_name = Rf_install(kIntStringOptionName);
     return (Rf_asLogical(Rf_GetOption1(option_name)));
@@ -33,20 +31,22 @@ bool UseStringsForInt64() {
 // Rcpp::wrap silently coerces 64-bit integers to numerics
 // which drop precision for values between 2^53 - 2^64.
 // So, if an option is set, we return as a character string.
-template<typename ValueType>
+template <typename ValueType>
 SEXP Int64AsSEXP(ValueType value) {
+    BEGIN_RCPP
     if (UseStringsForInt64()) {
         std::stringstream ss;
         if ((ss << value).fail()) {
             // This should not happen, its a bug in the code.
-            string message = string("Error converting int64 to string, unset ") +
-                    kIntStringOptionName + " option.";
-            throwException(message.c_str(), "ConversionException");
-		}
+            std::string message = std::string("Error converting int64 to string, unset ") +
+                kIntStringOptionName + " option.";
+            Rcpp::stop(message.c_str());
+        }
         return Rcpp::CharacterVector(ss.str());
     } else {
         return Rcpp::wrap(value);
     }
+    END_RCPP
 }
 
 /**
@@ -55,141 +55,135 @@ SEXP Int64AsSEXP(ValueType value) {
  * @param pointer external pointer to a message
  * @param name name of the field
  *
- * @return the field called "name" of the message if the 
+ * @return the field called "name" of the message if the
  *         message has the field, otherwise an error is generated
  */
-SEXP getMessageField( SEXP pointer, SEXP name ){
-	
-#ifdef RPB_DEBUG
-Rprintf( "<getMessageField>\n" ) ;
+RcppExport SEXP getMessageField(SEXP pointer, SEXP name) {
 
-PRINT_DEBUG_INFO( "pointer", pointer ) ;
-PRINT_DEBUG_INFO( "name", name ) ;
-#endif
+    RPB_DEBUG_BEGIN("getMessageField")
+    PRINT_DEBUG_INFO("pointer", pointer);
+    PRINT_DEBUG_INFO("name", name);
 
-	/* grab the Message pointer */
-	Rcpp::XPtr<GPB::Message> message(pointer) ;
+    /* grab the Message pointer */
+    Rcpp::XPtr<GPB::Message> message(pointer);
 
-	GPB::FieldDescriptor* field_desc = getFieldDescriptor( message, name ) ;
-	
-#ifdef RPB_DEBUG
-Rprintf( "</getMessageField>\n" ) ;
-#endif
+    GPB::FieldDescriptor* field_desc = getFieldDescriptor(message, name);
 
-	return( extractFieldAsSEXP(message, field_desc) ) ;
-	
+    RPB_DEBUG_END("getMessageField");
+
+    return (extractFieldAsSEXP(message, field_desc));
 }
 
-SEXP extractFieldAsSEXP( const Rcpp::XPtr<GPB::Message>& message,
-						 const GPB::FieldDescriptor*  fieldDesc ){
+RcppExport SEXP extractFieldAsSEXP(const Rcpp::XPtr<GPB::Message>& message,
+				   const GPB::FieldDescriptor* fieldDesc) {
+    BEGIN_RCPP
+    const Reflection* ref = message->GetReflection();
 
-    const Reflection * ref = message->GetReflection() ;
-       
-    if( fieldDesc->is_repeated() ){
-    	
-    	switch( GPB::FieldDescriptor::TypeToCppType(fieldDesc->type()) ){
+    if (fieldDesc->is_repeated()) {
+
+        switch (GPB::FieldDescriptor::TypeToCppType(fieldDesc->type())) {
 
 #undef HANDLE_REPEATED_FIELD
-#define HANDLE_REPEATED_FIELD(TYPE,DATATYPE) \
-		case TYPE :													\
-			return Rcpp::wrap( RepeatedFieldImporter<DATATYPE>(ref, *message, fieldDesc) ) ; \
+#define HANDLE_REPEATED_FIELD(TYPE, DATATYPE) \
+    case TYPE:                                \
+        return Rcpp::wrap(RepeatedFieldImporter<DATATYPE>(ref, *message, fieldDesc));
 
-			HANDLE_REPEATED_FIELD(CPPTYPE_INT32, GPB::int32) ;
-    		HANDLE_REPEATED_FIELD(CPPTYPE_UINT32, GPB::uint32) ;
-    		HANDLE_REPEATED_FIELD(CPPTYPE_DOUBLE, double) ;
-    		HANDLE_REPEATED_FIELD(CPPTYPE_FLOAT, float) ;
-    		HANDLE_REPEATED_FIELD(CPPTYPE_BOOL, bool) ;
-    		HANDLE_REPEATED_FIELD(CPPTYPE_ENUM, enum_field ) ;
-    		HANDLE_REPEATED_FIELD(CPPTYPE_MESSAGE, message_field ) ;
+            HANDLE_REPEATED_FIELD(CPPTYPE_INT32, GPB::int32)
+            HANDLE_REPEATED_FIELD(CPPTYPE_DOUBLE, double)
+            HANDLE_REPEATED_FIELD(CPPTYPE_FLOAT, float)
+            HANDLE_REPEATED_FIELD(CPPTYPE_BOOL, bool)
+            HANDLE_REPEATED_FIELD(CPPTYPE_ENUM, enum_field)
+            HANDLE_REPEATED_FIELD(CPPTYPE_MESSAGE, message_field)
+            // TODO(mstokely): Rcpp doesn't handle uint32 properly as of 2013/12
+            // See
+            // https://r-forge.r-project.org/tracker/index.php?func=detail&aid=1360&group_id=155&atid=637
+            case CPPTYPE_UINT32:
+                return Rcpp::wrap(UInt32RepeatedFieldImporter(ref, *message, fieldDesc));
 #ifdef RCPP_HAS_LONG_LONG_TYPES
             // We can't handle these the same way, because Rcpp::wrap silently
             // casts int64s to doubles which may cause us to lose precision.
             case CPPTYPE_INT64:
                 if (UseStringsForInt64()) {
-                    return Rcpp::wrap(
-                        Int64AsStringRepeatedFieldImporter(ref, *message,
-                                                           fieldDesc));
+                    return Rcpp::wrap(Int64AsStringRepeatedFieldImporter(ref, *message, fieldDesc));
                 } else {
-                    return Rcpp::wrap(
-                        RepeatedFieldImporter<int64>(ref, *message, fieldDesc));
+                    return Rcpp::wrap(RepeatedFieldImporter<int64>(ref, *message, fieldDesc));
                 }
             case CPPTYPE_UINT64:
                 if (UseStringsForInt64()) {
                     return Rcpp::wrap(
-                        UInt64AsStringRepeatedFieldImporter(ref, *message,
-                                                            fieldDesc));
+                        UInt64AsStringRepeatedFieldImporter(ref, *message, fieldDesc));
                 } else {
-                    return Rcpp::wrap(
-                        RepeatedFieldImporter<uint64>(ref, *message, fieldDesc));
+                    return Rcpp::wrap(RepeatedFieldImporter<uint64>(ref, *message, fieldDesc));
                 }
 #endif
 #undef HANDLE_REPEATED_FIELD
 
-		case CPPTYPE_STRING:
-			if (fieldDesc->type() == TYPE_STRING) {
-				return Rcpp::wrap( RepeatedFieldImporter<std::string>(ref, *message, fieldDesc) ) ;
-			} else if (fieldDesc->type() == TYPE_BYTES) {
-				int field_size = ref->FieldSize( *message, fieldDesc ) ;
-				Rcpp::List res(field_size);
-				for (int i=0; i<field_size; i++) {
-					std::string s = ref->GetRepeatedString(*message, fieldDesc, i);
-					res[i] =  Rcpp::wrap(std::vector<Rbyte>(s.begin(), s.end()));
-				}
-				return res;
-			} else {
-				throwException( "unknown field type with CPP_TYPE STRING", "ConversionException" ) ;
-			}
-			
-		default:
-			throwException("Unsupported type", "ConversionException");
-    	}
-    	
+            case CPPTYPE_STRING:
+                if (fieldDesc->type() == TYPE_STRING) {
+                    return Rcpp::wrap(RepeatedFieldImporter<std::string>(ref, *message, fieldDesc));
+                } else if (fieldDesc->type() == TYPE_BYTES) {
+                    int field_size = ref->FieldSize(*message, fieldDesc);
+                    Rcpp::List res(field_size);
+                    for (int i = 0; i < field_size; i++) {
+                        std::string s = ref->GetRepeatedString(*message, fieldDesc, i);
+                        res[i] = Rcpp::wrap(std::vector<Rbyte>(s.begin(), s.end()));
+                    }
+                    return res;
+                } else {
+                    Rcpp::stop("unknown field type with CPP_TYPE STRING");
+                }
+
+            default:
+                Rcpp::stop("Unsupported type");
+        }
+
     } else {
-    	
-    	switch( GPB::FieldDescriptor::TypeToCppType(fieldDesc->type()) ){
+        switch (GPB::FieldDescriptor::TypeToCppType(fieldDesc->type())) {
 
 #undef HANDLE_SINGLE_FIELD
-#define HANDLE_SINGLE_FIELD(CPPTYPE,SUFFIX) 					\
-		case CPPTYPE: 									\
-			return Rcpp::wrap( ref->Get##SUFFIX(*message, fieldDesc ) ) ;
+#define HANDLE_SINGLE_FIELD(CPPTYPE, SUFFIX) \
+    case CPPTYPE:                            \
+        return Rcpp::wrap(ref->Get##SUFFIX(*message, fieldDesc));
 
-		HANDLE_SINGLE_FIELD( CPPTYPE_INT32,  Int32 ); 
-		HANDLE_SINGLE_FIELD( CPPTYPE_UINT32, UInt32 ); 
-		HANDLE_SINGLE_FIELD( CPPTYPE_DOUBLE, Double );
-		HANDLE_SINGLE_FIELD( CPPTYPE_FLOAT, Float );
-		HANDLE_SINGLE_FIELD( CPPTYPE_BOOL, Bool );
+            HANDLE_SINGLE_FIELD(CPPTYPE_INT32, Int32)
+            HANDLE_SINGLE_FIELD(CPPTYPE_DOUBLE, Double)
+            HANDLE_SINGLE_FIELD(CPPTYPE_FLOAT, Float)
+            HANDLE_SINGLE_FIELD(CPPTYPE_BOOL, Bool)
+            // TODO(mstokely): Rcpp doesn't handle uint32 properly as of 2013/12
+            // See
+            // https://r-forge.r-project.org/tracker/index.php?func=detail&aid=1360&group_id=155&atid=637
+            case CPPTYPE_UINT32:
+                return Rcpp::wrap(double(ref->GetUInt32(*message, fieldDesc)));
 #ifdef RCPP_HAS_LONG_LONG_TYPES
-        // Handle these types separately since Rcpp::wrap doesn't
-        // do the right thing.
-        case CPPTYPE_INT64:
-            return Int64AsSEXP<int64>(ref->GetInt64(*message, fieldDesc));
-        case CPPTYPE_UINT64:
-            return Int64AsSEXP<uint64>(ref->GetUInt64(*message, fieldDesc));
+            // Handle these types separately since Rcpp::wrap doesn't
+            // do the right thing.
+            case CPPTYPE_INT64:
+                return Int64AsSEXP<int64>(ref->GetInt64(*message, fieldDesc));
+            case CPPTYPE_UINT64:
+                return Int64AsSEXP<uint64>(ref->GetUInt64(*message, fieldDesc));
 #endif
 #undef HANDLE_SINGLE_FIELD
 
-		case CPPTYPE_STRING:
-			if (fieldDesc->type() == TYPE_STRING) {
-				return Rcpp::wrap( ref->GetString(*message, fieldDesc) );
-			} else if (fieldDesc->type() == TYPE_BYTES) {
-				std::string s = ref->GetString(*message, fieldDesc);
-				return Rcpp::wrap(std::vector<Rbyte>(s.begin(), s.end()));
-			} else {
-				throwException( "unknown field type with CPP_TYPE STRING", "ConversionException" ) ;			   
-			}
-		case CPPTYPE_ENUM : 
-			return Rcpp::wrap( ref->GetEnum( *message, fieldDesc )->number() ) ;
-    		
-   		case CPPTYPE_MESSAGE:
-			return S4_Message( CLONE( &ref->GetMessage( *message, fieldDesc ) ) ) ;
-			break ;
+            case CPPTYPE_STRING:
+                if (fieldDesc->type() == TYPE_STRING) {
+                    return Rcpp::wrap(ref->GetString(*message, fieldDesc));
+                } else if (fieldDesc->type() == TYPE_BYTES) {
+                    std::string s = ref->GetString(*message, fieldDesc);
+                    return Rcpp::wrap(std::vector<Rbyte>(s.begin(), s.end()));
+                } else {
+                    Rcpp::stop("unknown field type with CPP_TYPE STRING");
+                }
+            case CPPTYPE_ENUM:
+                return Rcpp::wrap(ref->GetEnum(*message, fieldDesc)->number());
 
-		default:
-			throwException("Unsupported type", "ConversionException");
-    	}
+            case CPPTYPE_MESSAGE:
+                return S4_Message(CLONE(&ref->GetMessage(*message, fieldDesc)));
 
+            default:
+                Rcpp::stop("Unsupported type");
+        }
     }
-    return R_NilValue ; /* -Wall */
+    END_RCPP
 }
 
-} // namespace rprotobuf
+}  // namespace rprotobuf

@@ -2,6 +2,68 @@
 \title{News for Package \pkg{RProtoBuf}}
 \newcommand{\cpkg}{\href{http://CRAN.R-project.org/package=#1}{\pkg{#1}}}
 
+\section{Changes in RProtoBuf version 0.4.0 (2014-01-14)}{
+  \itemize{
+    \item Changes to support CRAN builds for MS Windows.
+    \item Added functions \code{serialize_pb}, \code{unserialize_pb},
+    and \code{can_serialize_pb} plus documentation from Jeroen Ooms
+    RProtoBufUtils package.
+    \item New dir \code{inst/python} with some Python examples.
+    \item Added Jeroen Ooms as author.
+    \item Vignettes have been converted to the R 3.0.0 or later use of
+    external vignette builders, no longer need a \code{Makefile}
+    \item Added missing methods to dollar completion list for Message,
+    Descriptor, EnumValueDescriptor, and FileDescriptor classes.
+    \item Add missing export for \code{.DollarNames} EnumValueDescriptor
+    to allow completion on that class.
+    \item Add more than 15 additional pages to the main Intro vignette
+    documenting better all of the S4 classes implemented by RProtoBuf,
+    updating the type mapping tables to take into account 64-bit
+    support, and documenting advanced features such as Extensions.
+    \item Added better error checking in EnumDescriptors to catch the
+    case when wrong types are provided.
+    \item Updated the FileDescriptor \code{name()} method to accept a boolean
+    for full paths just like the generic \code{name()} method.
+    \item Correct a bug that incorrectly dispatched \code{as.character()} when
+    \code{as.list()} was called on Descriptor objects.
+    \item Update FileDescriptor \code{$} dispatch to work properly for
+    the names of fields defined in the FileDescriptor, instead of
+    just returning \code{NULL} even for types returned by \code{$}
+    completion.
+    \item Added a reservation for extension fields in the example
+    tutorial.Person schema.
+    \item Support setting int32 fields with character representations
+    and raise an R-level \code{stop()} error if the provided string can
+    not be parsed as a 32-bit integer, rather than crashing the R
+    instance.
+    \item Update the project TODO file.
+    \item Add better documentation and tests for all of the above.
+    \item Corrected the handling of uint32 and fixed32 types in protocol
+    buffers to ensure that they work with numbers as large as 2^32 - 1,
+    which is larger than an integer can hold in R since R does not have an
+    unsigned integer class.  These values are stored as doubles internally
+    now to avoid losing precision.
+    \item Added unit tests to verify behavior of RProtoBuf with extreme
+    values for uint32 types.
+    \item Removed old exception handling code and instead rely on the
+    more modern Rcpp::stop method maintained in Rcpp.
+    \item Add better error messages when setting a repeated field of
+    messages to inform the user which element index was of the wrong type
+    and what the expected type was.
+    \item Add an optional 'partial' argument to readASCII allowing
+    uninitialized message fragments to be read in.
+    \item (internal) Added const qualifiers in more places throughout
+    the C++ code for type safety.
+    \item (internal) Standardize coding conventions of the C++ files and
+    run them through clang-format for consistency.  A STYLE file has
+    been submitted to R-Forge with details about the coding standards
+    and how they are enforced with Emacs and clang-format.
+    \item Applied changes suggested by Kevin Ushey to the \code{S4}
+    class handling to support both the currently released \cpkg{Rcpp} as
+    well as the currently pending next version.
+  }
+}
+
 \section{Changes in RProtoBuf version 0.3.2 (2013-12-15)}{
   \itemize{
     \item Fixed a bug that erroneously prevented users from setting raw

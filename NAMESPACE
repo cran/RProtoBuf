@@ -7,6 +7,7 @@ importFrom(utils, str, packageDescription)
 importFrom(stats, update)
 importFrom(tools, file_path_as_absolute)
 importFrom(RCurl, basicTextGatherer, curlPerform)
+importFrom(Rcpp, evalCpp)
 
 exportClasses(
 
@@ -83,6 +84,7 @@ if( exists( ".DollarNames", asNamespace("utils") ) ) importFrom( utils, .DollarN
 S3method(.DollarNames, Message )
 S3method(.DollarNames, Descriptor )
 S3method(.DollarNames, EnumDescriptor )
+S3method(.DollarNames, EnumValueDescriptor )
 S3method(.DollarNames, FileDescriptor )
 S3method(.DollarNames, FieldDescriptor )
 S3method(.DollarNames, ServiceDescriptor )
@@ -103,5 +105,8 @@ S3method( as.list, ServiceDescriptor )
 exportPattern( "^TYPE_" )
 exportPattern( "^CPPTYPE_" )
 exportPattern( "^LABEL_" )
+
+# copied from RProtoBufUtils
+export( "serialize_pb", "unserialize_pb", "can_serialize_pb" )
 
 # export( run_unit_tests )

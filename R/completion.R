@@ -17,7 +17,7 @@ if( !exists( ".DollarNames", envir = asNamespace("utils") ) ){
 	names <- c( 
 		.Call( "Message__fieldNames", x@pointer, PACKAGE = "RProtoBuf" ) ,
 		"has(", "clone()", "clone(", "isInitialized()", "serialize(", 
-		"clear()", "clear(", "size(", "bytesize()", 
+		"clear()", "clear(", "size(", "bytesize()", "fetch(",
 		"swap(", "str()", "as.character()", "update(", "as.list()", 
                 "setExtension(", "getExtension(",
                 "descriptor()", "set(", "toString(", "add(", "fileDescriptor()" )
@@ -30,7 +30,8 @@ if( !exists( ".DollarNames", envir = asNamespace("utils") ) ){
 	
 	names <- c( 
 		.Call( "Descriptor__getMemberNames", x@pointer, PACKAGE = "RProtoBuf" ), 
-		"new(", "read(", "readASCII(", "fileDescriptor()", "name(", "fileDescriptor()", 
+		"new(", "read(", "readASCII(", "fileDescriptor()", "name(",
+                "toString()", "as.character()", "asMessage()",
 		"containing_type()", "field_count()", "nested_type_count()", "enum_type_count", 
 		"field(", "nested_type(", "enum_type(" )
 	grep( pattern, names, value = TRUE )
@@ -43,7 +44,16 @@ if( !exists( ".DollarNames", envir = asNamespace("utils") ) ){
 	names <- c( 
 		.Call( "EnumDescriptor__getConstantNames", x@pointer, PACKAGE = "RProtoBuf" ), 
 		"name(", "fileDescriptor()", "as.character()", "toString()", 
-		"containing_type()", "length()", "value_count()", "value(" )
+		"containing_type()", "length()", "value_count()", "value(",
+		"has(", "asMessage()")
+	grep( pattern, names, value = TRUE )
+}
+# }}}
+
+# {{{ EnumValueDescriptor
+.DollarNames.EnumValueDescriptor <- function(x, pattern = "" ){
+	names <- c("number()", "name()", "enum_type()",
+		   "as.character()", "toString()", "asMessage()")
 	grep( pattern, names, value = TRUE )
 }
 # }}}
@@ -54,7 +64,8 @@ if( !exists( ".DollarNames", envir = asNamespace("utils") ) ){
 		"fileDescriptor()", "containing_type()", 
 		"is_extension()", "number()", "type(", "cpp_type(", "label(", 
 		"is_repeated()", "is_required()", "is_optional()", 
-		"message_type()", "enum_type()"
+		"message_type()", "enum_type()", "asMessage()",
+		"has_default_value()", "default_value("
 	)
 	grep( pattern, names, value = TRUE )
 }
@@ -82,7 +93,8 @@ if( !exists( ".DollarNames", envir = asNamespace("utils") ) ){
 .DollarNames.FileDescriptor <- function(x, pattern = "" ){
 	names <- c(
 		.Call( "FileDescriptor__getMemberNames", x@pointer, PACKAGE = "RProtoBuf" ), 
-		"as.character()", "toString()", "name(" )
+		"as.character()", "toString()", "name(", "as.list()",
+                   "asMessage()", "package()")
 	grep( pattern, names, value = TRUE )
 }
 # }}}

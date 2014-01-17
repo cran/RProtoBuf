@@ -1,5 +1,4 @@
-// -*- mode: C++; c-indent-level: 4; c-basic-offset: 4; tab-width: 8 -*-
-//
+// -*- indent-tabs-mode: nil; tab-width: 4; show-trailing-whitespace: t; c-indent-level: 4; c-basic-offset: 4; -*-
 // wrapper_EnumValueDescriptor.h: R/C++ interface class library
 //
 // Copyright (C) 2010 - 2011  Dirk Eddelbuettel and Romain Francois
@@ -22,31 +21,29 @@
 #include "rprotobuf.h"
 #include "RcppMacros.h"
 
-namespace rprotobuf{
+namespace rprotobuf {
 
 #undef METHOD
-#define METHOD(__NAME__) RCPP_PP_CAT(EnumValueDescriptor__,__NAME__)
+#define METHOD(__NAME__) RCPP_PP_CAT(EnumValueDescriptor__, __NAME__)
 
-RPB_XP_METHOD_0( METHOD(as_character) , GPB::EnumValueDescriptor , DebugString) ;
+RPB_XP_METHOD_0(METHOD(as_character), GPB::EnumValueDescriptor, DebugString)
 
-RPB_FUNCTION_1(S4_Message, METHOD(as_Message) , Rcpp::XPtr<GPB::EnumValueDescriptor> d ){
-	GPB::EnumValueDescriptorProto* message = new GPB::EnumValueDescriptorProto() ; 
-	d->CopyTo( message ); 
-	return S4_Message(message) ;
-}
-		
-RPB_FUNCTION_2( std::string, METHOD(name), Rcpp::XPtr<GPB::EnumValueDescriptor> d, bool full) {
-	return full ? d->full_name() : d->name() ;
+RPB_FUNCTION_1(S4_Message, METHOD(as_Message), Rcpp::XPtr<GPB::EnumValueDescriptor> d) {
+    GPB::EnumValueDescriptorProto* message = new GPB::EnumValueDescriptorProto();
+    d->CopyTo(message);
+    return S4_Message(message);
 }
 
-RPB_FUNCTION_1( int, METHOD(number), Rcpp::XPtr<GPB::EnumValueDescriptor> d) {
-        return d->number() ;
+RPB_FUNCTION_2(std::string, METHOD(name), Rcpp::XPtr<GPB::EnumValueDescriptor> d, bool full) {
+    return full ? d->full_name() : d->name();
 }
 
-RPB_FUNCTION_1(S4_EnumDescriptor, METHOD(enum_type), Rcpp::XPtr<GPB::EnumValueDescriptor> d ){
-	return S4_EnumDescriptor( d->type());
+RPB_FUNCTION_1(int, METHOD(number), Rcpp::XPtr<GPB::EnumValueDescriptor> d) { return d->number(); }
+
+RPB_FUNCTION_1(S4_EnumDescriptor, METHOD(enum_type), Rcpp::XPtr<GPB::EnumValueDescriptor> d) {
+    return S4_EnumDescriptor(d->type());
 }
 
 #undef METHOD
 
-} // namespace rprotobuf
+}  // namespace rprotobuf

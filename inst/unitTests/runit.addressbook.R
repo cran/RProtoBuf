@@ -51,12 +51,15 @@ test.ascii <- function() {
     # (better than silently getting an empty proto.)
     book4 <- checkException( readASCII( tutorial.AddressBook, file(out.file, "rt")))
 
-    # Verify that we get an exception if the file is not readable.
-    old.mode <- file.info(out.file)[["mode"]]
-    Sys.chmod(out.file, "0000")
-    book5 <- checkException( readASCII( tutorial.AddressBook, file(out.file, "rb")))
-    # Set the permissions back to ensure the file is cleaned up properly.
-    Sys.chmod(out.file, old.mode)
+    # Test does not work on windows because of chmod
+    if(!grepl("mingw", R.Version()$platform)){
+        # Verify that we get an exception if the file is not readable.
+        old.mode <- file.info(out.file)[["mode"]]
+        Sys.chmod(out.file, "0000")
+        book5 <- checkException( readASCII( tutorial.AddressBook, file(out.file, "rb")))
+        # Set the permissions back to ensure the file is cleaned up properly.
+        Sys.chmod(out.file, old.mode)
+    }
 
     # Verify that we get an exception if the file is not parseable.
     out.file2 <- tempfile()
@@ -66,4 +69,16 @@ test.ascii <- function() {
     # Verify that we get an exception if we forget the file() and thus treat the
     # path as a protobuf string.
     checkException( readASCII( tutorial.AddressBook, out.file2))
+
+    incomplete.msg <- new(tutorial.Person, name="Murray", email="murray@stokely.org")
+    tmp.file <- tempfile()
+    writeLines(as.character(incomplete.msg), file(tmp.file))
+
+    checkTrue(!incomplete.msg$isInitialized())
+    # Verify we normally get an exception if we try to read an incomplete ASCII protocol buffer
+    checkException( tutorial.Person$readASCII(file(tmp.file)))
+
+    # Verify we can however read it if we set partial=TRUE.
+    new.msg <- tutorial.Person$readASCII(file(tmp.file), TRUE)
+    checkEquals(incomplete.msg$name, new.msg$name)
 }

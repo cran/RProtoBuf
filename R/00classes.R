@@ -203,10 +203,10 @@ setMethod("$", "Descriptor", function(x, name) {
 	switch( name,
 		"new" = function( ... ) newProto( x, ... ) ,
 		"read" = function( input ) read( x, input ) ,
-		"readASCII" = function( input ) readASCII( x, input ),
+		"readASCII" = function(input, ...) readASCII(x, input, ...),
 		"toString" = function(...) toString(x, ...) ,
 		"as.character" = function(...) as.character(x, ...) ,
-		"as.list" = function(...) as.character(x, ...) ,
+		"as.list" = function(...) as.list(x, ...) ,
 		"asMessage" = function() asMessage(x),
 		"fileDescriptor" = function() fileDescriptor(x ),
 		"name" = function(...) name(x, ... ),
@@ -288,9 +288,9 @@ setMethod( "$", "FileDescriptor", function(x, name ){
 		"toString" = function(...) toString(x, ...) ,
 		"asMessage" = function() asMessage(x),
 		"as.list" = function() as.list(x),
-      		"name" = function() x@filename,
+      		"name" = function(...) name(x, ... ),
        		"package" = function() x@package,
-		invisible(NULL)
+                as.list(x)[[name]]
 		)
 })
 
@@ -344,8 +344,8 @@ setMethod( "$", "ZeroCopyInputStream", function(x, name ){
 		"BackUp" = function(...) BackUp(x, ...),
 
 		# CodedInputStream related
-		"ReadRaw" = function(...) ReadRaw(...),
-		"ReadString" = function(...) ReadString(...),
+		"ReadRaw" = function(...) ReadRaw(x, ...),
+		"ReadString" = function(...) ReadString(x, ...),
 		"ReadVarint32"= function() ReadVarint32(x),
 		"ReadVarint64" = function() ReadVarint64(x),
 		"ReadLittleEndian32" = function() ReadLittleEndian32(x),

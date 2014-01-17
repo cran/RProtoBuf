@@ -1,13 +1,2203 @@
 \documentclass[11pt]{article}
-%\VignetteIndexEntry{RProtoBuf}
+%\VignetteIndexEntry{RProtoBuf-intro}
+%\VignetteEngine{highlight::highlight}
+%\VignetteKeywords{RProtoBuf, Protocol Buffers, package}
+%\VignetteDepends{RProtoBuf}
 
 \usepackage{url}
+\usepackage{color}
 \usepackage[colorlinks]{hyperref}
+\definecolor{link}{rgb}{0,0,0.3}
+\hypersetup{
+    colorlinks,%
+    citecolor=link,%
+    filecolor=link,%
+    linkcolor=link,%
+    urlcolor=link
+}
 \setlength{\oddsidemargin}{0pt}
 \setlength{\textwidth}{17cm} % uh-oh, I use letter :)
+\setcounter{tocdepth}{2}
 
-\author{Romain Fran\c{c}ois \and Dirk Eddelbuettel}
+\usepackage{microtype}                     %% cf http://www.khirevich.com/latex/microtype/
+\usepackage[T1]{fontenc}		   %% cf http://www.khirevich.com/latex/font/
+\usepackage[bitstream-charter]{mathdesign} %% cf http://www.khirevich.com/latex/font/
+
+<<echo=FALSE,print=FALSE>>=
+library("RProtoBuf")
+options("width"=65)
+rpb.version <- packageDescription("RProtoBuf")$Version
+prettyDate <- format(Sys.Date(), "%B %e, %Y")
+@
+% closing $ needed here
+
+
+\author{Romain Fran\c{c}ois \and Dirk Eddelbuettel \and Murray Stokely}
 \title{RProtoBuf: An R API for Protocol Buffers}
+\date{Version \Sexpr{rpb.version} as of \Sexpr{prettyDate}}
 \begin{document}
-\end{document}
+\maketitle
 
+\abstract{
+  \noindent
+  \textsl{Protocol Buffers} is a software project by Google that is used
+  extensively internally and also released under an Open Source license.
+  It provides a way of encoding structured data in an efficient yet
+  extensible format. Google formally supports APIs for C++, Java and Python.
+
+  This vignette describes version \Sexpr{rpb.version} of the
+  \texttt{RProtoBuf} package which brings support for protocol buffer
+  messages to R.
+
+}
+
+
+\tableofcontents
+
+\section{Protocol Buffers}
+
+Protocol buffers are a language-neutral, platform-neutral, extensible
+way of serializing structured data for use in communications
+protocols, data storage, and more.
+
+Protocol Buffers offer key features such as an efficient data interchange
+format that is both language- and operating system-agnostic yet uses a
+lightweight and highly performant encoding, object serialization and
+de-serialization as well data and configuration management. Protocol
+buffers are also forward compatible: updates to the \texttt{proto}
+files do not break programs built against the previous specification.
+
+While benchmarks are not available, Google states on the project page that in
+comparison to XML, protocol buffers are at the same time \textsl{simpler},
+between three to ten times \textsl{smaller}, between twenty and one hundred
+times \textsl{faster}, as well as less ambiguous and easier to program.
+
+The protocol buffers code is released under an open-source (BSD) license. The
+protocol buffer project (\url{http://code.google.com/p/protobuf/})
+contains a C++ library and a set of runtime libraries and compilers for
+C++, Java and Python.
+
+With these languages, the workflow follows standard practice of so-called
+Interface Description Languages (IDL)
+(c.f. \href{http://en.wikipedia.org/wiki/Interface_description_language}{Wikipedia
+  on IDL}).  This consists of compiling a protocol buffer description file
+(ending in \texttt{.proto}) into language specific classes that can be used
+to create, read, write and manipulate protocol buffer messages. In other
+words, given the 'proto' description file, code is automatically generated
+for the chosen target language(s). The project page contains a tutorial for
+each of these officially supported languages:
+\url{http://code.google.com/apis/protocolbuffers/docs/tutorials.html}
+
+Besides the officially supported C++, Java and Python implementations, several projects have been
+created to support protocol buffers for many languages. The list of known
+languages to support protocol buffers is compiled as part of the
+project page: \url{http://code.google.com/p/protobuf/wiki/ThirdPartyAddOns}
+
+The protocol buffer project page contains a comprehensive
+description of the language: \url{http://code.google.com/apis/protocolbuffers/docs/proto.html}
+
+\section{Basic use: Protocol Buffers and R}
+
+This section describes how to use the R API to create and manipulate
+protocol buffer messages in R, and how to read and write the
+binary \emph{payload} of the messages to files and arbitrary binary
+R connections.
+
+\subsection{Importing proto files dynamically}
+
+In contrast to the other languages (Java, C++, Python) that are officially
+supported by Google, the implementation used by the \texttt{RProtoBuf}
+package does not rely on the \texttt{protoc} compiler (with the exception of
+the two functions discussed in the previous section). This means that no
+initial step of statically compiling the proto file into C++ code that is
+then accessed by R code is necessary. Instead, \texttt{proto} files are
+parsed and processed \textsl{at runtime} by the protobuf C++ library---which
+is much more appropriate for a dynamic language.
+
+The \texttt{readProtoFiles} function allows importing \texttt{proto}
+files in several ways.
+
+<<>>=
+args( readProtoFiles )
+@
+
+Using the \texttt{file} argument, one can specify one or several file
+paths that ought to be proto files.
+
+<<>>=
+proto.dir <- system.file( "proto", package = "RProtoBuf" )
+proto.file <- file.path( proto.dir, "addressbook.proto" )
+<<eval=FALSE>>=
+readProtoFiles( proto.file )
+@
+
+With the \texttt{dir} argument, which is
+ignored if the \texttt{file} is supplied, all files matching the
+\texttt{.proto} extension will be imported.
+
+<<>>=
+dir( proto.dir, pattern = "\\.proto$", full.names = TRUE )
+<<eval=FALSE>>=
+readProtoFiles( dir = proto.dir )
+@
+
+Finally, with the
+\texttt{package} argument (ignored if \texttt{file} or
+\texttt{dir} is supplied), the function will import all \texttt{.proto}
+files that are located in the \texttt{proto} sub-directory of the given
+package. A typical use for this argument is in the \texttt{.onLoad}
+function of a package.
+
+<<eval=FALSE>>=
+readProtoFiles( package = "RProtoBuf" )
+@
+
+Once the proto files are imported, all message descriptors are
+are available in the R search path in the \texttt{RProtoBuf:DescriptorPool}
+special environment. The underlying mechanism used here is
+described in more detail in section~\ref{sec-lookup}.
+
+<<>>=
+ls( "RProtoBuf:DescriptorPool" )
+@
+
+
+\subsection{Creating a message}
+
+The objects contained in the special environment are
+descriptors for their associated message types. Descriptors will be
+discussed in detail in another part of this document, but for the
+purpose of this section, descriptors are just used with the \texttt{new}
+function to create messages.
+
+<<>>=
+p <- new( tutorial.Person, name = "Romain", id = 1 )
+@
+
+\subsection{Access and modify fields of a message}
+
+Once the message is created, its fields can be queried
+and modified using the dollar operator of R, making protocol
+buffer messages seem like lists.
+
+<<>>=
+p$name
+p$id
+p$email <- "francoisromain@free.fr"
+@
+
+However, as opposed to R lists, no partial matching is performed
+and the name must be given entirely.
+
+The \verb|[[| operator can also be used to query and set fields
+of a mesages, supplying either their name or their tag number :
+
+<<>>=
+p[["name"]] <- "Romain Francois"
+p[[ 2 ]] <- 3
+p[[ "email" ]]
+@
+
+Protocol buffers include a 64-bit integer type, but R lacks native
+64-bit integer support.  A workaround is available and described in
+Section~\ref{sec:int64} for working with large integer values.
+
+% TODO(mstokely): Document extensions here.
+% There are none in addressbook.proto though.
+
+\subsection{Display messages}
+
+Protocol buffer messages and descriptors implement \texttt{show}
+methods that provide basic information about the message :
+
+<<>>=
+p
+@
+
+For additional information, such as for debugging purposes,
+the \texttt{as.character} method provides a more complete ASCII
+representation of the contents of a message.
+
+<<>>=
+writeLines( as.character( p ) )
+@
+
+\subsection{Serializing messages}
+
+However, the main focus of protocol buffer messages is
+efficiency. Therefore, messages are transported as a sequence
+of bytes. The \texttt{serialize} method is implemented for
+protocol buffer messages to serialize a message into the sequence of
+bytes (raw vector in R speech) that represents the message.
+
+<<>>=
+serialize( p, NULL )
+@
+
+The same method can also be used to serialize messages to files :
+
+<<>>=
+tf1 <- tempfile()
+tf1
+serialize( p, tf1 )
+readBin( tf1, raw(0), 500 )
+@
+
+Or to arbitrary binary connections:
+
+<<>>=
+tf2 <- tempfile()
+con <- file( tf2, open = "wb" )
+serialize( p, con )
+close( con )
+readBin( tf2, raw(0), 500 )
+@
+
+\texttt{serialize} can also be used in a more traditionnal
+object oriented fashion using the dollar operator :
+
+<<>>=
+# serialize to a file
+p$serialize( tf1 )
+# serialize to a binary connection
+con <- file( tf2, open = "wb" )
+p$serialize( con )
+close( con )
+@
+
+
+\subsection{Parsing messages}
+
+The \texttt{RProtoBuf} package defines the \texttt{read}
+function to read messages from files, raw vector (the message payload)
+and arbitrary binary connections.
+
+<<>>=
+args( read )
+@
+
+
+The binary representation of the message (often called the payload)
+does not contain information that can be used to dynamically
+infer the message type, so we have to provide this information
+to the \texttt{read} function in the form of a descriptor :
+
+<<>>=
+message <- read( tutorial.Person, tf1 )
+writeLines( as.character( message ) )
+@
+
+The \texttt{input} argument of \texttt{read} can also be a binary
+readable R connection, such as a binary file connection:
+
+<<>>=
+con <- file( tf2, open = "rb" )
+message <- read( tutorial.Person, con )
+close( con )
+writeLines( as.character( message ) )
+@
+
+Finally, the payload of the message can be used :
+
+<<>>=
+# reading the raw vector payload of the message
+payload <- readBin( tf1, raw(0), 5000 )
+message <- read( tutorial.Person, payload )
+@
+
+
+\texttt{read} can also be used as a pseudo method of the descriptor
+object :
+
+<<>>=
+# reading from a file
+message <- tutorial.Person$read( tf1 )
+# reading from a binary connection
+con <- file( tf2, open = "rb" )
+message <- tutorial.Person$read( con )
+close( con )
+# read from the payload
+message <- tutorial.Person$read( payload )
+@
+
+\section{Classes, Methods and Pseudo Methods}
+
+The \texttt{RProtoBuf} package uses the S4 system to store
+information about descriptors and messages, but the information stored
+in the R object is very minimal and mainly consists of an external
+pointer to a C++ variable that is managed by the \texttt{proto} C++
+library.
+
+<<>>=
+str( p )
+@
+
+Using the S4 system allows the \texttt{RProtoBuf} package to dispatch
+methods that are not generic in the S3 sense, such as \texttt{new}
+and \texttt{serialize}.
+
+The \texttt{RProtoBuf} package combines the \emph{R typical} dispatch
+of the form \verb|method( object, arguments)| and the more traditional
+object oriented notation \verb|object$method(arguments)|.
+
+\subsection{messages}
+
+Messages are represented in R using the \texttt{Message}
+S4 class. The class contains the slots \texttt{pointer} and \texttt{type} as
+described on the Table~\ref{Message-class-table}.
+
+\begin{table}[h]
+\centering
+\begin{tabular}{|cp{10cm}|}
+\hline
+\textbf{slot} & \textbf{description} \\
+\hline
+\texttt{pointer} & external pointer to the \texttt{Message} object of the C++ proto library. Documentation for the
+\texttt{Message} class is available from the protocol buffer project page:
+\url{http://code.google.com/apis/protocolbuffers/docs/reference/cpp/google.protobuf.message.html#Message} \\
+\hline
+\texttt{type} & fully qualified path of the message. For example a \texttt{Person} message
+has its \texttt{type} slot set to \texttt{tutorial.Person} \\
+\hline
+\end{tabular}
+\caption{\label{Message-class-table}Description of slots for the \texttt{Message} S4 class}
+\end{table}
+
+Although the \texttt{RProtoBuf} package uses
+the S4 system, the \verb|@| operator is very rarely used. Fields of the
+message are retrieved or modified using the \verb|$| or \verb|[[| operators
+as seen on the previous section, and pseudo-methods can also
+be called using the \verb|$| operator. The table~\ref{Message-methods-table}
+describes the methods defined for the \texttt{Message} class :
+
+\begin{table}[h]
+\centering
+\begin{small}
+\begin{tabular}{|ccp{8cm}|}
+\hline
+\textbf{method} & \textbf{section} & \textbf{description} \\
+\hline
+\hline
+\texttt{has} & \ref{Message-method-has} & Indicates if a message has a given field.   \\
+\texttt{clone} &  \ref{Message-method-clone} & Creates a clone of the message \\
+\texttt{isInitialized} & \ref{Message-method-isInitialized} & Indicates if a message has all its required fields set\\
+\texttt{serialize} & \ref{Message-method-serialize} & serialize a message to a file or a binary connection or retrieve the message payload as a raw vector\\
+\texttt{clear} & \ref{Message-method-clear} & Clear one or several fields of a message, or the entire message\\
+\texttt{size} & \ref{Message-method-size} & The number of elements in a message field\\
+\texttt{bytesize} & \ref{Message-method-bytesize} & The number of bytes the message would take once serialized\\
+\hline
+\texttt{swap} & \ref{Message-method-swap} & swap elements of a repeated field of a message\\
+\texttt{set} & \ref{Message-method-set} & set elements of a repeated field\\
+\texttt{fetch} & \ref{Message-method-fetch} & fetch elements of a repeated field\\
+\texttt{setExtension} & \ref{Message-method-setExtension} & set an extension of a message\\
+\texttt{getExtension} & \ref{Message-method-getExtension} & get the value of an extension of a message\\
+\texttt{add} & \ref{Message-method-add} & add elements to a repeated field \\
+\hline
+\texttt{str} & \ref{Message-method-str} & the R structure of the message\\
+\texttt{as.character} & \ref{Message-method-ascharacter} & character representation of a message\\
+\texttt{toString} & \ref{Message-method-toString} & character representation of a message (same as \texttt{as.character}) \\
+\texttt{as.list} & \ref{Message-method-aslist} & converts message to a
+named R list\\
+\texttt{update} & \ref{Message-method-update} & updates several fields of a message at once\\
+\texttt{descriptor} & \ref{Message-method-descriptor} & get the descriptor of the message type of this message\\
+\texttt{fileDescriptor} & \ref{Message-method-fileDescriptor} & get the file descriptor
+of this message's descriptor\\
+\hline
+\end{tabular}
+\end{small}
+\caption{\label{Message-methods-table}Description of methods for the \texttt{Message} S4 class}
+\end{table}
+
+\subsubsection{Retrieve fields}
+\label{Message-method-getfield}
+
+The \verb|$| and \verb|[[| operators allow extraction of a field data.
+
+<<keep.source=T>>=
+message <- new( tutorial.Person,
+	name = "foo", email = "foo@bar.com", id = 2,
+	phone = list(
+		new( tutorial.Person.PhoneNumber, number = "+33(0)...", type = "HOME" ),
+		new( tutorial.Person.PhoneNumber, number = "+33(0)###", type = "MOBILE" )
+	) )
+message$name
+message$email
+message[[ "phone" ]]
+# using the tag number
+message[[ 2 ]] # id
+@
+
+Neither \verb|$| nor \verb|[[| support partial matching of names. The
+\verb|$| is also used to call methods on the message, and the
+\verb|[[| operator can use the tag number of the field.
+
+The table~\ref{table-get-types} details correspondance between
+the field type and the type of data that is retrieved by \verb|$| and
+\verb|[[|.
+
+\begin{table}[h]
+\centering
+\begin{small}
+\begin{tabular}{|c|p{5cm}p{5cm}|}
+\hline
+field type & R type (non repeated) & R type (repeated) \\
+\hline
+\hline
+double	& \texttt{double} vector & \texttt{double} vector \\
+float	& \texttt{double} vector & \texttt{double} vector \\
+\hline
+uint32	  & \texttt{double} vector & \texttt{double} vector \\
+fixed32	  & \texttt{double} vector & \texttt{double} vector \\
+\hline
+int32	  & \texttt{integer} vector & \texttt{integer} vector \\
+sint32	  & \texttt{integer} vector & \texttt{integer} vector \\
+sfixed32  & \texttt{integer} vector & \texttt{integer} vector \\
+\hline
+int64	  & \texttt{integer} or \texttt{character}
+vector \footnotemark & \texttt{integer} or \texttt{character} vector \\
+uint64	  & \texttt{integer} or \texttt{character} vector & \texttt{integer} or \texttt{character} vector \\
+sint64	  & \texttt{integer} or \texttt{character} vector & \texttt{integer} or \texttt{character} vector \\
+fixed64	  & \texttt{integer} or \texttt{character} vector & \texttt{integer} or \texttt{character} vector \\
+sfixed64  & \texttt{integer} or \texttt{character} vector & \texttt{integer} or \texttt{character} vector \\
+\hline
+bool	& \texttt{logical} vector & \texttt{logical} vector \\
+\hline
+string	& \texttt{character} vector & \texttt{character} vector \\
+bytes	& \texttt{character} vector & \texttt{character} vector \\
+\hline
+enum & \texttt{integer} vector & \texttt{integer} vector \\
+\hline
+message & \texttt{S4} object of class \texttt{Message} & \texttt{list} of \texttt{S4} objects of class \texttt{Message} \\
+\hline
+\end{tabular}
+\end{small}
+\caption{\label{table-get-types}Correspondance between field type and
+  R type retrieved by the extractors. \footnotesize{1. R lacks native
+  64-bit integers, so the \texttt{RProtoBuf.int64AsString} option is
+  available to return large integers as characters to avoid losing
+  precision.  This option is described in Section~\ref{sec:int64}}.  R
+  also lacks an unsigned integer type.}
+\end{table}
+
+\subsubsection{Modify fields}
+\label{Message-method-setfield}
+
+The \verb|$<-| and \verb|[[<-| operators are implemented for
+\texttt{Message} objects to set the value of a field. The
+R data is coerced to match the type of the message field.
+
+<<>>=
+message <- new( tutorial.Person,
+	name = "foo", id = 2 )
+message$email <- "foo@bar.com"
+message[[ "id" ]] <- 2
+message[[ 1 ]] <- "foobar"
+writeLines( message$as.character() )
+@
+
+The table~\ref{table-message-field-setters} describes the R types that
+are allowed in the right hand side depending on the target type of the
+field.
+
+\begin{table}[h]
+\centering
+\begin{small}
+\begin{tabular}{|p{5cm}|p{7cm}|}
+\hline
+internal type & allowed R types \\
+\hline
+\hline
+\texttt{double}, \texttt{float}	& \texttt{integer}, \texttt{raw}, \texttt{double}, \texttt{logical} \\
+\hline
+\texttt{int32},  \texttt{int64},  \texttt{uint32},  \texttt{uint64},  \texttt{sint32},
+\texttt{sint64},  \texttt{fixed32},  \texttt{fixed64},  \texttt{sfixed32},  \texttt{sfixed64}
+&
+	\texttt{integer}, \texttt{raw}, \texttt{double},
+        \texttt{logical}, \texttt{character} \\
+\hline
+\texttt{bool} & \texttt{integer}, \texttt{raw}, \texttt{double}, \texttt{logical} \\
+\hline
+\texttt{bytes}, \texttt{string} & \texttt{character} \\
+\hline
+\texttt{enum} & \texttt{integer}, \texttt{double}, \texttt{raw}, \texttt{character} \\
+\hline
+\texttt{message}, \texttt{group} & \texttt{S4}, of class \texttt{Message} of the appropriate message type, or a \texttt{list} of
+\texttt{S4} objects of class \texttt{Message} of the appropriate message type.\\
+\hline
+\end{tabular}
+\end{small}
+\caption{\label{table-message-field-setters}Allowed R types depending on internal field types. }
+\end{table}
+
+
+\subsubsection{Message\$has method}
+\label{Message-method-has}
+
+The \texttt{has} method indicates if a field of a message is set. For
+repeated fields, the field is considered set if there is at least
+on object in the array. For non-repeated fields, the field is considered
+set if it has been initialized.
+
+The \texttt{has} method is a thin wrapper around the \texttt{HasField}
+and \texttt{FieldSize} methods of the \texttt{google::protobuf::Reflection} C++ class.
+
+<<>>=
+message <- new( tutorial.Person, name = "foo" )
+message$has( "name" )
+message$has( "id" )
+message$has( "phone" )
+@
+
+\subsubsection{Message\$clone method}
+\label{Message-method-clone}
+
+The \texttt{clone} function creates a new message that is a clone
+of the message. This function is a wrapper around the methods \texttt{New}
+and \texttt{CopyFrom} of the \texttt{google::protobuf::Message} C++ class.
+
+<<>>=
+m1 <- new( tutorial.Person, name = "foo" )
+m2 <- m1$clone( )
+m2$email <- "foo@bar.com"
+writeLines( as.character( m1 ) )
+writeLines( as.character( m2 ) )
+@
+
+\subsubsection{Message\$isInitialized method}
+\label{Message-method-isInitialized}
+
+The \texttt{isInitialized} method quickly checks
+if all required fields have values set. This is a thin wrapper
+around the \texttt{IsInitialized} method of the
+\texttt{google::protobuf::Message} C++ class.
+
+<<>>=
+message <- new( tutorial.Person, name = "foo" )
+message$isInitialized()
+message$id <- 2
+message$isInitialized()
+@
+
+\subsubsection{Message\$serialize method}
+\label{Message-method-serialize}
+
+The \texttt{serialize} method can be used to serialize
+the message as a sequence of bytes into a file or a binary connection.
+
+<<>>=
+message <- new( tutorial.Person, name = "foo", email = "foo@bar.com", id = 2 )
+tf1 <- tempfile( )
+tf1
+message$serialize( tf1 )
+
+tf2 <- tempfile( )
+tf2
+con <- file( tf2, open = "wb" )
+message$serialize( con )
+close( con )
+@
+
+The files \Sexpr{basename(tf1)} and \Sexpr{basename(tf2)} both
+contain the message payload as a sequence of bytes. The \texttt{readBin}
+function can be used to read the files as a raw vector in R:
+
+<<>>=
+readBin( tf1, raw(0), 500 )
+readBin( tf2, raw(0), 500 )
+@
+
+The \texttt{serialize} method can also be used to directly retrieve the
+payload of the message as a raw vector:
+
+<<>>=
+message$serialize(NULL)
+@
+
+\subsubsection{Message\$clear method}
+\label{Message-method-clear}
+
+The \texttt{clear} method can be used to clear all fields of a
+message when used with no argument, or a given field.
+
+<<>>=
+message <- new( tutorial.Person, name = "foo", email = "foo@bar.com", id = 2 )
+writeLines( as.character( message ) )
+message$clear()
+writeLines( as.character( message ) )
+
+message <- new( tutorial.Person, name = "foo", email = "foo@bar.com", id = 2 )
+message$clear( "id" )
+writeLines( as.character( message ) )
+@
+
+The \texttt{clear} method is a thin wrapper around the
+\texttt{Clear} method of the \texttt{google::protobuf::Message} C++ class.
+
+
+\subsubsection{Message\$size method}
+\label{Message-method-size}
+
+The \texttt{size} method is used to query the number of objects
+in a repeated field of a message :
+
+<<keep.source=T>>=
+message <- new( tutorial.Person, name = "foo",
+	phone = list(
+		new( tutorial.Person.PhoneNumber, number = "+33(0)...", type = "HOME"  ),
+		new( tutorial.Person.PhoneNumber, number = "+33(0)###", type = "MOBILE"  )
+		) )
+message$size( "phone" )
+size( message, "phone" )
+@
+
+The \texttt{size} method is a thin wrapper around the \texttt{FieldSize}
+method of the \texttt{google::protobuf::Reflection} C++ class.
+
+
+\subsubsection{Message\$bytesize method}
+\label{Message-method-bytesize}
+
+The \texttt{bytesize} method retrieves the number of bytes the message
+would take once serialized. This is a thin wrapper around the \texttt{ByteSize}
+method of the \texttt{google::protobuf::Message} C++ class.
+
+<<>>=
+message <- new( tutorial.Person, name = "foo", email = "foo@bar.com", id = 2 )
+message$bytesize()
+bytesize( message )
+length( message$serialize( NULL ) )
+@
+
+\subsubsection{Message\$swap method}
+\label{Message-method-swap}
+
+The \texttt{swap} method can be used to swap elements
+of a repeated field.
+
+<<keep.source=T>>=
+message <- new( tutorial.Person, name = "foo",
+	phone = list(
+		new( tutorial.Person.PhoneNumber, number = "+33(0)...", type = "HOME"  ),
+		new( tutorial.Person.PhoneNumber, number = "+33(0)###", type = "MOBILE"  )
+		) )
+message$swap( "phone", 1, 2 )
+writeLines( as.character( message$phone[[1]] ) )
+writeLines( as.character( message$phone[[2]] ) )
+
+swap( message, "phone", 1, 2 )
+writeLines( as.character( message$phone[[1]] ) )
+writeLines( as.character( message$phone[[2]] ) )
+@
+
+
+\subsubsection{Message\$set method}
+\label{Message-method-set}
+
+The \texttt{set} method can be used to set values
+of a repeated field.
+
+<<keep.source=T>>=
+message <- new( tutorial.Person, name = "foo",
+	phone = list(
+		new( tutorial.Person.PhoneNumber, number = "+33(0)...", type = "HOME"  ),
+		new( tutorial.Person.PhoneNumber, number = "+33(0)###", type = "MOBILE"  )
+		) )
+number <- new( tutorial.Person.PhoneNumber,
+		number = "+33(0)---", type = "WORK"  )
+message$set( "phone", 1, number )
+writeLines( as.character( message ) )
+@
+
+\subsubsection{Message\$fetch method}
+\label{Message-method-fetch}
+
+The \texttt{fetch} method can be used to get values
+of a repeated field.
+
+<<keep.source=T>>=
+message <- new( tutorial.Person, name = "foo",
+	phone = list(
+		new( tutorial.Person.PhoneNumber, number = "+33(0)...", type = "HOME"  ),
+		new( tutorial.Person.PhoneNumber, number = "+33(0)###", type = "MOBILE"  )
+		) )
+message$fetch( "phone", 1 )
+@
+
+\subsubsection{Message\$setExtension method}
+\label{Message-method-setExtension}
+
+The \texttt{setExtension} method can be used to get values
+of a repeated field.
+
+<<keep.source=T>>=
+if (!exists("protobuf_unittest.TestAllTypes",
+            "RProtoBuf:DescriptorPool")) {
+    unittest.proto.file <- system.file("unitTests", "data",
+                                       "unittest.proto",
+                                       package="RProtoBuf")
+    readProtoFiles(file=unittest.proto.file)
+}
+
+## Test setting a singular extensions.
+test <- new(protobuf_unittest.TestAllExtensions)
+test$setExtension(protobuf_unittest.optional_int32_extension,
+                  as.integer(1))
+@
+
+\subsubsection{Message\$getExtension method}
+\label{Message-method-getExtension}
+
+The \texttt{getExtension} method can be used to get values
+of an extension.
+
+<<keep.source=T>>=
+test$getExtension(protobuf_unittest.optional_int32_extension)
+@
+
+\subsubsection{Message\$add method}
+\label{Message-method-add}
+
+The \texttt{add} method can be used to add values to a repeated field.
+
+<<keep.source=T>>=
+message <- new( tutorial.Person, name = "foo")
+phone <- new( tutorial.Person.PhoneNumber,
+	number = "+33(0)...", type = "HOME"  )
+message$add( "phone", phone )
+writeLines( message$toString() )
+@
+
+\subsubsection{Message\$str method}
+\label{Message-method-str}
+
+The \texttt{str} method gives the R structure of the message. This is rarely
+useful.
+
+<<>>=
+message <- new( tutorial.Person, name = "foo", email = "foo@bar.com", id = 2 )
+message$str()
+str( message )
+@
+
+\subsubsection{Message\$as.character method}
+\label{Message-method-ascharacter}
+
+The \texttt{as.character} method gives the debug string of the message.
+
+<<>>=
+message <- new( tutorial.Person, name = "foo", email = "foo@bar.com", id = 2 )
+writeLines( message$as.character() )
+writeLines( as.character( message ) )
+@
+
+\subsubsection{Message\$toString method}
+\label{Message-method-toString}
+
+\texttt{toString} currently is an alias to the \texttt{as.character} function.
+
+<<>>=
+message <- new( tutorial.Person, name = "foo", email = "foo@bar.com", id = 2 )
+writeLines( message$toString() )
+writeLines( toString( message ) )
+@
+
+\subsubsection{Message\$as.list method}
+\label{Message-method-aslist}
+
+The \texttt{as.list} method converts the message to an named R list
+
+<<>>=
+message <- new( tutorial.Person, name = "foo", email = "foo@bar.com", id = 2 )
+as.list( message )
+@
+
+The names of the list are the names of the declared fields of the
+message type, and the content is the same as can be extracted with
+the \verb|$| operator described in
+section~\ref{Message-method-getfield}.
+
+\subsubsection{Message\$update method}
+\label{Message-method-update}
+
+The \texttt{update} method can be used to update several fields
+of a message at once.
+
+<<keep.source=TRUE>>=
+message <- new( tutorial.Person )
+update( message,
+	name = "foo",
+	id = 2,
+	email = "foo@bar.com" )
+writeLines( message$as.character() )
+@
+
+\subsubsection{Message\$descriptor method}
+\label{Message-method-descriptor}
+
+The \texttt{descriptor} method retrieves the
+descriptor of a message. See section~\ref{subsec-descriptor}
+for more information about message type descriptors.
+
+<<>>=
+message <- new( tutorial.Person )
+message$descriptor()
+descriptor( message )
+@
+
+\subsubsection{Message\$fileDescriptor method}
+\label{Message-method-fileDescriptor}
+
+The \texttt{fileDescriptor} method retrieves the
+file descriptor of the descriptor associated with a message.
+See section~\ref{subsec-fileDescriptor} for more information
+about file descriptors.
+
+<<>>=
+message <- new( tutorial.Person )
+message$fileDescriptor()
+fileDescriptor( message )
+@
+
+\subsection{message descriptors}
+\label{subsec-descriptor}
+
+Message descriptors are represented in R with the
+\emph{Descriptor} S4 class. The class contains
+the slots \texttt{pointer} and \texttt{type} :
+
+\begin{table}[h]
+\centering
+\begin{tabular}{|cp{10cm}|}
+\hline
+\textbf{slot} & \textbf{description} \\
+\hline
+\texttt{pointer} & external pointer to the \texttt{Descriptor} object of the C++ proto library. Documentation for the
+\texttt{Descriptor} class is available from the protocol buffer project page:
+\url{http://code.google.com/apis/protocolbuffers/docs/reference/cpp/google.protobuf.descriptor.html#Descriptor} \\
+\hline
+\texttt{type} & fully qualified path of the message type. \\
+\hline
+\end{tabular}
+\caption{\label{Descriptor-class-table}Description of slots for the \texttt{Descriptor} S4 class}
+\end{table}
+
+Similarly to messages, the \verb|$| operator can be used to extract
+information from the descriptor, or invoke pseuso-methods.
+Table~\ref{Descriptor-methods-table} describes the methods defined for the \texttt{Descriptor} class :
+
+\begin{table}[h]
+\centering
+\begin{small}
+\begin{tabular}{|ccp{8cm}|}
+\hline
+\textbf{Method} & \textbf{Section} & \textbf{Description} \\
+\hline
+\hline
+\texttt{new} & \ref{Descriptor-method-new} & Creates a prototype of a message described by this descriptor.\\
+\texttt{read} & \ref{Descriptor-method-read} & Reads a message from a file or binary connection.\\
+\texttt{readASCII} & \ref{Descriptor-method-readASCII} & Read a message in ASCII format from a file or
+text connection.\\
+\hline
+\texttt{name} & \ref{Descriptor-method-name} & Retrieve the name of the message type associated with
+this descriptor.\\
+\texttt{as.character} & \ref{Descriptor-method-ascharacter} & character representation of a descriptor\\
+\texttt{toString} & \ref{Descriptor-method-tostring} & character representation of a descriptor (same as \texttt{as.character}) \\
+\texttt{as.list} & \ref{Descriptor-method-aslist} & return a named
+list of the field, enum, and nested descriptors included in this descriptor.\\
+\texttt{asMessage} & \ref{Descriptor-method-asmessage} &
+return DescriptorProto message. \\
+\hline
+\texttt{fileDescriptor} & \ref{Descriptor-method-filedescriptor} & Retrieve the file descriptor of this
+descriptor.\\
+\texttt{containing\_type} & \ref{Descriptor-method-containingtype} & Retrieve the descriptor describing the message type containing this descriptor.\\
+\texttt{field\_count} & \ref{Descriptor-method-fieldcount} & Return the number of fields in this descriptor.\\
+\texttt{field} & \ref{Descriptor-method-field} & Return the descriptor for the specified field in this descriptor.\\
+\texttt{nested\_type\_count} & \ref{Descriptor-method-nestedtypecount}
+& The number of nested types in this descriptor.\\
+\texttt{nested\_type} & \ref{Descriptor-method-nestedtype} & Return the descriptor for the specified nested
+type in this descriptor.\\
+\texttt{enum\_type\_count} & \ref{Descriptor-method-enumtypecount} & The number of enum types in this descriptor.\\
+\texttt{enum\_type} & \ref{Descriptor-method-enumtype} & Return the descriptor for the specified enum
+type in this descriptor.\\
+\hline
+\end{tabular}
+\end{small}
+\caption{\label{Descriptor-methods-table}Description of methods for the \texttt{Descriptor} S4 class}
+\end{table}
+
+\subsubsection{Extracting descriptors}
+
+The \verb|$| operator, when used on a descriptor object retrieves
+descriptors that are contained in the descriptor.
+
+This can be a field descriptor (see section~\ref{subsec-field-descriptor} ),
+an enum descriptor (see section~\ref{subsec-enum-descriptor}) or a descriptor
+for a nested type
+
+<<>>=
+# field descriptor
+tutorial.Person$email
+
+# enum descriptor
+tutorial.Person$PhoneType
+
+# nested type descriptor
+tutorial.Person$PhoneNumber
+# same as
+tutorial.Person.PhoneNumber
+@
+
+\subsubsection{The new method}
+\label{Descriptor-method-new}
+
+The \texttt{new} method creates a prototype of a message
+described by the descriptor.
+
+<<>>=
+tutorial.Person$new( )
+new( tutorial.Person )
+@
+
+Passing additional arguments to the method allows to directlt set
+the fields of the message at construction time.
+
+<<>>=
+tutorial.Person$new( email = "foo@bar.com" )
+
+# same as
+update( tutorial.Person$new( ), email = "foo@bar.com" )
+@
+
+\subsubsection{The read method}
+\label{Descriptor-method-read}
+
+The \texttt{read} method is used to read a message
+from a file or a binary connection.
+
+<<>>=
+# start by serializing a message
+message <- new( tutorial.Person.PhoneNumber,
+	type = "HOME", number = "+33(0)...." )
+tf <- tempfile()
+serialize( message, tf )
+
+# now read back the message
+m <- tutorial.Person.PhoneNumber$read( tf )
+writeLines( as.character( m ) )
+
+m <- read( tutorial.Person.PhoneNumber, tf )
+writeLines( as.character( m ) )
+@
+
+
+\subsubsection{The readASCII method}
+\label{Descriptor-method-readASCII}
+
+The \texttt{readASCII} method is used to read a message
+from a text file or a character vector.
+
+<<>>=
+# start by generating the ASCII representation of a message
+text <- as.character(new(tutorial.Person, id=1, name="Murray"))
+text
+# Then read the ascii representation in as a new message object.
+msg <- tutorial.Person$readASCII(text)
+@
+
+\subsubsection{The toString method}
+\label{Descriptor-method-tostring}
+
+\texttt{toString} currently is an alias to the \texttt{as.character} function.
+
+
+\subsubsection{The as.character method}
+\label{Descriptor-method-ascharacter}
+
+\texttt{as.character} prints the text representation of the descriptor
+as it would be specified in the \texttt{.proto} file.
+
+<<>>=
+desc <- tutorial.Person
+writeLines( desc$toString() )
+writeLines( toString( desc ) )
+writeLines( as.character(tutorial.Person) )
+@
+
+\subsubsection{as.list}
+\label{Descriptor-method-aslist}
+
+The \texttt{as.list} method returns a named list of the field, enum,
+and nested descriptors included in this descriptor.
+
+<<>>=
+tutorial.Person$as.list()
+@
+
+\subsubsection{asMessage}
+\label{Descriptor-method-asmessage}
+
+The \texttt{asMessage} method returns a message of type
+\texttt{google.protobuf.DescriptorProto} of the Descriptor.
+
+<<>>=
+tutorial.Person$asMessage()
+@
+
+\subsubsection{The fileDescriptor method}
+\label{Descriptor-method-filedescriptor}
+
+The \texttt{fileDescriptor} method retrieves the
+file descriptor of the descriptor.  See section~\ref{subsec-fileDescriptor} for more information
+about file descriptors.
+
+<<>>=
+desc <- tutorial.Person
+desc$fileDescriptor()
+fileDescriptor( desc )
+@
+
+\subsubsection{The name method}
+\label{Descriptor-method-name}
+
+The \texttt{name} method can be used to retrieve the name of the
+message type associated with the descriptor.
+
+<<>>=
+# simple name
+tutorial.Person$name()
+# name including scope
+tutorial.Person$name(full = TRUE)
+@
+
+\subsubsection{The containing\_type method}
+\label{Descriptor-method-containingtype}
+
+The \texttt{containing\_type} method retrieves the descriptor
+describing the message type containing this descriptor.
+
+<<>>=
+tutorial.Person$containing_type()
+tutorial.Person$PhoneNumber$containing_type()
+@
+
+\subsubsection{The field\_count method}
+\label{Descriptor-method-fieldcount}
+
+Tme \texttt{field\_count} method retrieves the number of fields in
+this descriptor.
+
+<<>>=
+tutorial.Person$field_count()
+@
+
+\subsubsection{The field method}
+\label{Descriptor-method-field}
+
+The \texttt{field} method returns the descriptor for the specified
+field in this descriptor.
+
+<<>>=
+tutorial.Person$field(1)
+@
+
+\subsubsection{The nested\_type\_count method}
+\label{Descriptor-method-nestedtypecount}
+
+The \texttt{nested\_type\_count} method returns the number of nested
+types in this descriptor.
+
+<<>>=
+tutorial.Person$nested_type_count()
+@
+
+\subsubsection{The nested\_type method}
+\label{Descriptor-method-nestedtype}
+
+The \texttt{nested\_type} method return the descriptor for the specified nested
+type in this descriptor.
+
+<<>>=
+tutorial.Person$nested_type(1)
+@
+
+\subsubsection{The enum\_type\_count method}
+\label{Descriptor-method-enumtypecount}
+
+The \texttt{enum\_type\_count} method returns the number of enum types
+in this descriptor.
+
+<<>>=
+tutorial.Person$enum_type_count()
+@
+
+\subsubsection{The enum\_type method}
+\label{Descriptor-method-enumtype}
+
+The \texttt{enum\_type} method returns the descriptor for the specified enum
+type in this descriptor.
+
+<<>>=
+tutorial.Person$enum_type(1)
+@
+
+\subsection{field descriptors}
+\label{subsec-field-descriptor}
+
+The class \emph{FieldDescriptor} represents field
+descriptor in R. This is a wrapper S4 class around the
+\texttt{google::protobuf::FieldDescriptor} C++ class.
+Table~\ref{fielddescriptor-methods-table} describes the methods
+defined for the \texttt{FieldDescriptor} class.
+
+\begin{table}[h]
+\centering
+\begin{tabular}{|cp{10cm}|}
+\hline
+\textbf{slot} & \textbf{description} \\
+\hline
+\texttt{pointer} & External pointer to the \texttt{FieldDescriptor} C++ variable \\
+\hline
+\texttt{name} & simple name of the field \\
+\hline
+\texttt{full\_name} & fully qualified name of the field \\
+\hline
+\texttt{type} & name of the message type where the field is declared \\
+\hline
+\end{tabular}
+\caption{\label{FieldDescriptor-class-table}Description of slots for the \texttt{FieldDescriptor} S4 class}
+\end{table}
+
+
+\begin{table}[h]
+\centering
+\begin{small}
+\begin{tabular}{|ccp{8cm}|}
+\hline
+\textbf{method} & \textbf{section} & \textbf{description} \\
+\hline
+\hline
+\texttt{as.character} & \ref{fielddescriptor-method-ascharacter} & character representation of a descriptor\\
+\texttt{toString} & \ref{fielddescriptor-method-tostring} & character
+representation of a descriptor (same as \texttt{as.character}) \\
+\texttt{asMessage} & \ref{fielddescriptor-method-asmessage} &
+return FieldDescriptorProto message. \\
+\texttt{name} &  \ref{fielddescriptor-method-name} & Return the name of the field descriptor.\\
+\texttt{fileDescriptor} & \ref{fielddescriptor-method-filedescriptor}
+& Return the fileDescriptor where this field is defined.\\
+\texttt{containing\_type} &
+\ref{fielddescriptor-method-containingtype} & Return the containing descriptor of this field.\\
+\texttt{is\_extension} & \ref{fielddescriptor-method-isextension} & Return TRUE if this field is an extension.\\
+\texttt{number} & \ref{fielddescriptor-method-number} & Gets the declared tag number of the field.\\
+\texttt{type} & \ref{fielddescriptor-method-type} & Gets the type of the field.\\
+\texttt{cpp\_type} & \ref{fielddescriptor-method-cpptype} & Gets the C++ type of the field.\\
+\texttt{label} & \ref{fielddescriptor-method-label} & Gets the label of a field (optional, required, or repeated).\\
+\texttt{is\_repeated} & \ref{fielddescriptor-method-isrepeated} & Return TRUE if this field is repeated.\\
+\texttt{is\_required} & \ref{fielddescriptor-method-isrequired} & Return TRUE if this field is required.\\
+\texttt{is\_optional} & \ref{fielddescriptor-method-isoptional} & Return TRUE if this field is optional.\\
+\texttt{has\_default\_value} & \ref{fielddescriptor-method-hasdefaultvalue} & Return TRUE if this field has a default value.\\
+\texttt{default\_value} & \ref{fielddescriptor-method-defaultvalue} &
+Return the default value.\\
+\texttt{message\_type} & \ref{fielddescriptor-method-messagetype} & Return the message type if this is a message type field.\\
+\texttt{enum\_type} & \ref{fielddescriptor-method-enumtype} & Return the enum type if this is an enum type field.\\
+\hline
+\end{tabular}
+\end{small}
+\caption{\label{fielddescriptor-methods-table}Description of methods for the \texttt{FieldDescriptor} S4 class}
+\end{table}
+
+\subsubsection{as.character}
+\label{fielddescriptor-method-ascharacter}
+
+The \texttt{as.character} method brings the debug string of the field descriptor.
+
+<<>>=
+writeLines( as.character( tutorial.Person$PhoneNumber ) )
+@
+
+\subsubsection{toString}
+\label{fielddescriptor-method-tostring}
+
+\texttt{toString} is an alias of \texttt{as.character}.
+
+<<>>=
+writeLines( tutorial.Person.PhoneNumber$toString() )
+@
+
+\subsubsection{asMessage}
+\label{fielddescriptor-method-asmessage}
+
+The \texttt{asMessage} method returns a message of type
+\texttt{google.protobuf.FieldDescriptorProto} of the FieldDescriptor.
+
+<<>>=
+tutorial.Person$id$asMessage()
+writeLines(as.character(tutorial.Person$id$asMessage()))
+@
+
+\subsubsection{name}
+\label{fielddescriptor-method-name}
+
+The \texttt{name} method can be used to retrieve the name of the
+field descriptor.
+
+<<>>=
+# simple name.
+name( tutorial.Person$id )
+# name including scope.
+name( tutorial.Person$id, full=TRUE )
+@
+
+\subsubsection{fileDescriptor}
+\label{fielddescriptor-method-filedescriptor}
+
+The \texttt{fileDescriptor} method can be used to retrieve the file
+descriptor of the field descriptor.
+
+<<>>=
+fileDescriptor(tutorial.Person$id)
+tutorial.Person$id$fileDescriptor()
+@
+
+\subsubsection{containing\_type}
+\label{fielddescriptor-method-containingtype}
+
+The \texttt{containing\_type} method can be used to retrieve the
+descriptor for the message type that contains this descriptor.
+
+<<>>=
+containing_type(tutorial.Person$id)
+tutorial.Person$id$containing_type()
+@
+
+
+\subsubsection{is\_extension}
+\label{fielddescriptor-method-isextension}
+
+The \texttt{is\_extension} method returns TRUE if this field is an extension.
+% TODO(ms): cross reference to a to be written section on extensions.
+
+<<>>=
+is_extension( tutorial.Person$id )
+tutorial.Person$id$is_extension()
+@
+
+\subsubsection{number}
+\label{fielddescriptor-method-number}
+
+The \texttt{number} method returns the declared tag number of this field.
+
+<<>>=
+number( tutorial.Person$id )
+tutorial.Person$id$number()
+@
+
+\subsubsection{type}
+\label{fielddescriptor-method-type}
+
+The \texttt{type} method can be used to retrieve the type of the
+field descriptor.
+
+<<>>=
+type( tutorial.Person$id )
+tutorial.Person$id$type()
+@
+\subsubsection{cpp\_type}
+\label{fielddescriptor-method-cpptype}
+
+The \texttt{cpp\_type} method can be used to retrieve the C++ type of the
+field descriptor.
+
+<<>>=
+cpp_type( tutorial.Person$id )
+tutorial.Person$id$cpp_type()
+@
+
+\subsubsection{label}
+\label{fielddescriptor-method-label}
+
+Gets the label of a field (optional, required, or repeated).
+The \texttt{label} method returns the label of a field (optional,
+required, or repeated).  By defualt it returns a number value, but the
+optional \texttt{as.string} argument can be provided to return a
+human readable string representation.
+
+<<>>=
+label( tutorial.Person$id )
+label( tutorial.Person$id , TRUE)
+tutorial.Person$id$label(TRUE)
+@
+\subsubsection{is\_repeated}
+\label{fielddescriptor-method-isrepeated}
+
+The \texttt{is\_repeated} method returns TRUE if this field is repeated.
+
+<<>>=
+is_repeated( tutorial.Person$id )
+tutorial.Person$id$is_repeated()
+@
+
+\subsubsection{is\_required}
+\label{fielddescriptor-method-isrequired}
+
+The \texttt{is\_required} method returns TRUE if this field is required.
+
+<<>>=
+is_required( tutorial.Person$id )
+tutorial.Person$id$is_required()
+@
+
+\subsubsection{is\_optional}
+\label{fielddescriptor-method-isoptional}
+
+The \texttt{is\_optional} method returns TRUE if this field is optional.
+
+<<>>=
+is_optional( tutorial.Person$id )
+tutorial.Person$id$is_optional()
+@
+
+\subsubsection{has\_default\_value}
+\label{fielddescriptor-method-hasdefaultvalue}
+
+The \texttt{has\_default\_value} method returns TRUE if this field has
+a default value.
+
+<<>>=
+has_default_value(tutorial.Person$PhoneNumber$type)
+has_default_value(tutorial.Person$PhoneNumber$number)
+@
+
+\subsubsection{default\_value}
+\label{fielddescriptor-method-defaultvalue}
+
+The \texttt{default\_value} method returns the default value of a field.
+
+<<>>=
+default_value( tutorial.Person$PhoneNumber$type )
+default_value( tutorial.Person$PhoneNumber$number )
+@
+
+\subsubsection{message\_type}
+\label{fielddescriptor-method-messagetype}
+
+The \texttt{message\_type} method returns the message type if this is
+a message type field.
+
+<<>>=
+message_type(tutorial.Person$phone)
+tutorial.Person$phone$message_type()
+@
+\subsubsection{enum\_type}
+\label{fielddescriptor-method-enumtype}
+
+The \texttt{enum\_type} method returns the enum type if this is an enum type field.
+
+<<>>=
+enum_type(tutorial.Person$PhoneNumber$type)
+@
+
+\subsection{enum descriptors}
+\label{subsec-enum-descriptor}
+
+The class \emph{EnumDescriptor} is an R wrapper
+class around the C++ class \texttt{google::protobuf::EnumDescriptor}.
+Table~\ref{enumdescriptor-methods-table} describes the methods
+defined for the \texttt{EnumDescriptor} class.
+
+\begin{table}[h]
+\centering
+\begin{tabular}{|cp{10cm}|}
+\hline
+\textbf{slot} & \textbf{description} \\
+\hline
+\texttt{pointer} & External pointer to the \texttt{EnumDescriptor} C++ variable \\
+\hline
+\texttt{name} & simple name of the enum \\
+\hline
+\texttt{full\_name} & fully qualified name of the enum \\
+\hline
+\texttt{type} & name of the message type where the enum is declared \\
+\hline
+\end{tabular}
+\caption{\label{EnumDescriptor-class-table}Description of slots for the \texttt{EnumDescriptor} S4 class}
+\end{table}
+
+\begin{table}[h]
+\centering
+\begin{small}
+\begin{tabular}{|ccp{8cm}|}
+\hline
+\textbf{method} & \textbf{section} & \textbf{description} \\
+\hline
+\hline
+\texttt{as.list} & \ref{enumdescriptor-method-aslist} & return a named
+integer vector with the values of the enum and their names.\\
+\texttt{as.character} & \ref{enumdescriptor-method-ascharacter} & character representation of a descriptor\\
+\texttt{toString} & \ref{enumdescriptor-method-tostring} & character
+representation of a descriptor (same as \texttt{as.character}) \\
+\texttt{asMessage} & \ref{enumdescriptor-method-asmessage} &
+return EnumDescriptorProto message. \\
+\texttt{name} &  \ref{enumdescriptor-method-name} & Return the name of the enum descriptor.\\
+\texttt{fileDescriptor} & \ref{enumdescriptor-method-filedescriptor}
+& Return the fileDescriptor where this field is defined.\\
+\texttt{containing\_type} &
+\ref{enumdescriptor-method-containingtype} & Return the containing descriptor of this field.\\
+\texttt{length} &
+\ref{enumdescriptor-method-length} & Return the number of constants in
+this enum.\\
+\texttt{has} &
+\ref{enumdescriptor-method-has} & Return TRUE if this enum contains
+the specified named constant string.\\
+\texttt{value\_count} &
+\ref{enumdescriptor-method-valuecount} & Return the number of constants in
+this enum (same as \texttt{length}).\\
+\texttt{value} &
+\ref{enumdescriptor-method-value} & Return the
+EnumValueDescriptor of an enum value of specified index, name, or number.\\
+\hline
+\end{tabular}
+\end{small}
+\caption{\label{enumdescriptor-methods-table}Description of methods for the \texttt{EnumDescriptor} S4 class}
+\end{table}
+
+\subsubsection{Extracting descriptors}
+
+The \verb|$| operator, when used on a EnumDescriptor object retrieves
+EnumValueDescriptors that are contained in the descriptor.
+
+<<>>=
+tutorial.Person$PhoneType$WORK
+name(tutorial.Person$PhoneType$value(number=2))
+@
+
+\subsubsection{as.list}
+\label{enumdescriptor-method-aslist}
+
+The \texttt{as.list} method creates a named R integer vector that
+captures the values of the enum and their names.
+
+<<>>=
+as.list( tutorial.Person$PhoneType )
+@
+
+\subsubsection{as.character}
+\label{enumdescriptor-method-ascharacter}
+
+The \texttt{as.character} method brings the debug string of the enum type.
+
+<<>>=
+writeLines( as.character( tutorial.Person$PhoneType ) )
+@
+
+\subsubsection{toString}
+\label{enumdescriptor-method-tostring}
+
+The \texttt{toString} method brings the debug string of the enum type.
+
+<<>>=
+writeLines( toString( tutorial.Person$PhoneType ) )
+@
+
+\subsubsection{asMessage}
+\label{enumdescriptor-method-asmessage}
+
+The \texttt{asMessage} method returns a message of type
+\texttt{google.protobuf.EnumDescriptorProto} of the EnumDescriptor.
+
+<<>>=
+tutorial.Person$PhoneType$asMessage()
+writeLines(as.character(tutorial.Person$PhoneType$asMessage()))
+@
+
+\subsubsection{name}
+\label{enumdescriptor-method-name}
+
+The \texttt{name} method can be used to retrieve the name of the
+enum descriptor.
+
+<<>>=
+# simple name.
+name( tutorial.Person$PhoneType )
+# name including scope.
+name( tutorial.Person$PhoneType, full=TRUE )
+@
+
+\subsubsection{fileDescriptor}
+\label{enumdescriptor-method-filedescriptor}
+
+The \texttt{fileDescriptor} method can be used to retrieve the file
+descriptor of the enum descriptor.
+
+<<>>=
+fileDescriptor(tutorial.Person$PhoneType)
+tutorial.Person$PhoneType$fileDescriptor()
+@
+
+\subsubsection{containing\_type}
+\label{enumdescriptor-method-containingtype}
+
+The \texttt{containing\_type} method can be used to retrieve the
+descriptor for the message type that contains this enum descriptor.
+
+<<>>=
+tutorial.Person$PhoneType$containing_type()
+@
+
+\subsubsection{length}
+\label{enumdescriptor-method-length}
+
+The \texttt{length} method returns the number of constants in this enum.
+
+<<>>=
+length(tutorial.Person$PhoneType)
+tutorial.Person$PhoneType$length()
+@
+
+\subsubsection{has}
+\label{enumdescriptor-method-has}
+
+The \texttt{has} method returns TRUE if this enum contains the
+specified named constant string.
+
+<<>>=
+tutorial.Person$PhoneType$has("WORK")
+tutorial.Person$PhoneType$has("nonexistant")
+@
+
+\subsubsection{value\_count}
+\label{enumdescriptor-method-valuecount}
+
+The \texttt{value\_count} method returnst he number of constants in
+this enum.
+%TODO(ms): Duplicate of length, just like tostring/as.character.
+<<>>=
+value_count(tutorial.Person$PhoneType)
+tutorial.Person$PhoneType$value_count()
+@
+
+\subsubsection{value}
+\label{enumdescriptor-method-value}
+
+The \texttt{value} method extracts an EnumValueDescriptor.  Exactly
+one argument of 'index', 'number', or 'name' must be specified to
+identify which constant is desired.
+
+<<>>=
+tutorial.Person$PhoneType$value(1)
+tutorial.Person$PhoneType$value(name="HOME")
+tutorial.Person$PhoneType$value(number=1)
+@
+
+\subsection{enum value descriptors}
+\label{subsec-EnumValueDescriptor}
+
+The class \emph{EnumValueDescriptor} is an R wrapper
+class around the C++ class \texttt{google::protobuf::EnumValueDescriptor}.
+Table~\ref{enumvaluedescriptor-methods-table} describes the methods
+defined for the \texttt{EnumValueDescriptor} class.
+
+\begin{table}[h]
+\centering
+\begin{tabular}{|cp{10cm}|}
+\hline
+\textbf{slot} & \textbf{description} \\
+\hline
+\texttt{pointer} & External pointer to the \texttt{EnumValueDescriptor} C++ variable \\
+\hline
+\texttt{name} & simple name of the enum value \\
+\hline
+\texttt{full\_name} & fully qualified name of the enum value \\
+\hline
+\end{tabular}
+\caption{\label{EnumValueDescriptor-class-table}Description of slots for the \texttt{EnumValueDescriptor} S4 class}
+\end{table}
+
+\begin{table}[h]
+\centering
+\begin{small}
+\begin{tabular}{|ccp{8cm}|}
+\hline
+\textbf{method} & \textbf{section} & \textbf{description} \\
+\hline
+\hline
+\texttt{number} & \ref{enumvaluedescriptor-method-number} & return the
+number of this EnumValueDescriptor. \\
+\texttt{name} & \ref{enumvaluedescriptor-method-name} & Return the name of
+the enum value descriptor.\\
+\texttt{enum\_type} & \ref{enumvaluedescriptor-method-enumtype} &
+return the EnumDescriptor type of this EnumValueDescriptor. \\
+\texttt{as.character} & \ref{enumvaluedescriptor-method-ascharacter} & character
+representation of a descriptor. \\
+\texttt{toString} & \ref{enumvaluedescriptor-method-tostring} & character
+representation of a descriptor (same as \texttt{as.character}). \\
+\texttt{asMessage} & \ref{enumvaluedescriptor-method-asmessage} &
+return EnumValueDescriptorProto message. \\
+\hline
+\end{tabular}
+\end{small}
+\caption{\label{enumvaluedescriptor-methods-table}Description of methods for the \texttt{EnumValueDescriptor} S4 class}
+\end{table}
+
+\subsubsection{number}
+\label{enumvaluedescriptor-method-number}
+
+The \texttt{number} method can be used to retrieve the number of the
+enum value descriptor.
+
+<<>>=
+number( tutorial.Person$PhoneType$value(number=2) )
+@
+
+\subsubsection{name}
+\label{enumvaluedescriptor-method-name}
+
+The \texttt{name} method can be used to retrieve the name of the
+enum value descriptor.
+
+<<>>=
+# simple name.
+name( tutorial.Person$PhoneType$value(number=2) )
+# name including scope.
+name( tutorial.Person$PhoneType$value(number=2), full=TRUE )
+@
+
+\subsubsection{enum\_type}
+\label{enumvaluedescriptor-method-enumtype}
+
+The \texttt{enum\_type} method can be used to retrieve the EnumDescriptor of the
+enum value descriptor.
+
+<<>>=
+enum_type( tutorial.Person$PhoneType$value(number=2) )
+@
+
+\subsubsection{as.character}
+\label{enumvaluedescriptor-method-ascharacter}
+
+The \texttt{as.character} method brings the debug string of the enum
+value type.
+
+<<>>=
+writeLines( as.character( tutorial.Person$PhoneType$value(number=2) ) )
+@
+
+\subsubsection{toString}
+\label{enumvaluedescriptor-method-tostring}
+
+The \texttt{toString} method brings the debug string of the enum value
+type.
+
+<<>>=
+writeLines( toString( tutorial.Person$PhoneType$value(number=2) ) )
+@
+
+\subsubsection{asMessage}
+\label{enumvaluedescriptor-method-asmessage}
+
+The \texttt{asMessage} method returns a message of type
+\texttt{google.protobuf.EnumValueDescriptorProto} of the EnumValueDescriptor.
+
+<<>>=
+tutorial.Person$PhoneType$value(number=2)$asMessage()
+writeLines(as.character(tutorial.Person$PhoneType$value(number=2)$asMessage()))
+@
+
+\subsection{file descriptors}
+\label{subsec-fileDescriptor}
+
+File descriptors describe a whole \texttt{.proto} file and are represented in R with the
+\emph{FileDescriptor} S4 class. The class contains
+the slots \texttt{pointer}, \texttt{filename}, and \texttt{package} :
+
+\begin{table}[h]
+\centering
+\begin{tabular}{|cp{10cm}|}
+\hline
+\textbf{slot} & \textbf{description} \\
+\hline
+\texttt{pointer} & external pointer to the \texttt{FileDescriptor} object of the C++ proto library. Documentation for the
+\texttt{FileDescriptor} class is available from the protocol buffer project page:
+\url{http://developers.google.com/protocol-buffers/docs/reference/cpp/google.protobuf.descriptor.html#FileDescriptor} \\
+\hline
+\texttt{filename} & fully qualified pathname of the \texttt{.proto} file.\\
+\hline
+\texttt{package} & package name defined in this \texttt{.proto} file.\\
+\hline
+\end{tabular}
+\caption{\label{FileDescriptor-class-table}Description of slots for the \texttt{FileDescriptor} S4 class}
+\end{table}
+
+Similarly to messages, the \verb|$| operator can be used to extract
+fields from the file descriptor (in this case, types defined in the
+file), or invoke pseuso-methods.
+Table~\ref{filedescriptor-methods-table} describes the methods
+defined for the \texttt{FileDescriptor} class.
+
+<<>>=
+f <- tutorial.Person$fileDescriptor()
+f
+f$Person
+@
+\begin{table}[h]
+\centering
+\begin{small}
+\begin{tabular}{|ccp{8cm}|}
+\hline
+\textbf{method} & \textbf{section} & \textbf{description} \\
+\hline
+\hline
+\texttt{name} & \ref{filedescriptor-method-name} & Return the filename
+for this FileDescriptorProto.\\
+\texttt{package} & \ref{filedescriptor-method-package} & Return the
+file-level package name specified in this FileDescriptorProto.\\
+\texttt{as.character} & \ref{filedescriptor-method-ascharacter} & character
+representation of a descriptor. \\
+\texttt{toString} & \ref{filedescriptor-method-tostring} & character
+representation of a descriptor (same as \texttt{as.character}). \\
+\texttt{asMessage} & \ref{filedescriptor-method-asmessage} &
+return FileDescriptorProto message. \\
+\texttt{as.list} & \ref{filedescriptor-method-aslist} &
+return named list of descriptors defined in this file descriptor.\\
+\hline
+\end{tabular}
+\end{small}
+\caption{\label{filedescriptor-methods-table}Description of methods for the \texttt{FileDescriptor} S4 class}
+\end{table}
+
+\subsubsection{as.character}
+\label{filedescriptor-method-ascharacter}
+The \texttt{as.character} method brings the debug string of the file descriptor.
+
+<<>>=
+writeLines( as.character(fileDescriptor(tutorial.Person)) )
+@
+
+\subsubsection{toString}
+\label{filedescriptor-method-tostring}
+
+\texttt{toString} is an alias of \texttt{as.character}.
+
+<<>>=
+writeLines( fileDescriptor(tutorial.Person)$toString() )
+@
+
+\subsubsection{asMessage}
+\label{filedescriptor-method-asmessage}
+
+The \texttt{asMessage} method returns a protocol buffer message representation of the file descriptor.
+
+<<>>=
+asMessage(tutorial.Person$fileDescriptor())
+writeLines( as.character(asMessage(tutorial.Person$fileDescriptor())) )
+@
+
+\subsubsection{as.list}
+\label{filedescriptor-method-aslist}
+
+The \texttt{as.list} method creates a named R list that contains the descriptors defined in this file descriptor.
+
+<<>>=
+as.list( tutorial.Person$fileDescriptor() )
+@
+
+\subsubsection{name}
+\label{filedescriptor-method-name}
+
+The \texttt{name} method can be used to retrieve the file name associated with the
+file descriptor.  The optional boolean argument can be specified if
+full pathnames are desired.
+
+<<>>=
+name( tutorial.Person$fileDescriptor() )
+tutorial.Person$fileDescriptor()$name(TRUE)
+@
+
+\subsubsection{package}
+\label{filedescriptor-method-package}
+
+The \texttt{package} method can be used to retrieve the package scope
+associated with this file descriptor.
+
+<<>>=
+tutorial.Person$fileDescriptor()$package()
+@
+
+\subsection{service descriptors}
+\label{subsec-ServiceDescriptor}
+
+Not fully implemented.  Needs to be connected to a concrete RPC
+implementation.  The Google Protocol Buffers C++ open-source library
+does not include an RPC implementation, but this can be connected
+easily to others.
+
+\subsection{method descriptors}
+\label{subsec-MethodDescriptor}
+
+Not fully implemented.  Needs to be connected to a concrete RPC
+implementation.  The Google Protocol Buffers C++ open-source library
+does not include an RPC implementation, but this can be connected
+easily to others.
+
+\section{Utilities}
+
+\subsection{coercing objects to messages}
+
+The \texttt{asMessage} function uses the standard coercion
+mechanism of the \texttt{as} method, and so can be used as a shorthand :
+
+<<>>=
+# coerce a message type descriptor to a message
+# asMessage( tutorial.Person )
+
+# coerce a enum descriptor
+asMessage( tutorial.Person.PhoneType )
+
+# coerce a field descriptor
+asMessage( tutorial.Person$email )
+
+# coerce a file descriptor
+asMessage( fileDescriptor( tutorial.Person ) )
+
+@
+
+\subsection{completion}
+
+The \texttt{RProtoBuf} package implements the
+\texttt{.DollarNames} S3 generic function
+(defined in the \texttt{utils} package) for all classes.
+
+Completion possibilities include pseudo method names for all
+classes, plus :
+\begin{itemize}
+\item field names for messages
+\item field names, enum types, nested types for message type descriptors
+\item names for enum descriptors
+\item names for top-level extensions
+\item message names for file descriptors
+\end{itemize}
+
+In the unlikely event that there is a user-defined field of exactly
+the same name as one of the pseudo methods, the user-defined field
+shall take precedence for completion purposes by design, since the
+method name can always be invoked directly.
+
+\subsection{with and within}
+
+The S3 generic \texttt{with} function is implemented for class
+\texttt{Message}, allowing to evaluate an R expression in
+an environment that allows to retrieve and set fields of a message
+simply using their names.
+
+<<>>=
+message <- new( tutorial.Person, email = "foo@bar.com" )
+with( message, {
+	# set the id field
+	id <- 2
+
+	# set the name field from the email field
+	name <- gsub( "[@]", " ", email )
+
+	sprintf( "%d [%s] : %s", id, email, name )
+} )
+@
+
+The difference between \texttt{with} and \texttt{within} is the value
+that is returned. For \texttt{with} returns the result of the R expression,
+for \texttt{within} the message is returned. In both cases, the message
+is modified because \texttt{RProtoBuf} works by reference.
+
+\subsection{identical}
+
+The \texttt{identical} method is implemented to compare two messages.
+
+<<>>=
+m1 <- new( tutorial.Person, email = "foo@bar.com", id = 2 )
+m2 <- update( new( tutorial.Person) , email = "foo@bar.com", id = 2 )
+identical( m1, m2 )
+@
+
+The \verb|==| operator can be used as an alias to \texttt{identical}.
+
+<<>>=
+m1 == m2
+m1 != m2
+@
+
+Alternatively, the \texttt{all.equal} function can be used, allowing
+a tolerance when comparing \texttt{float} or \texttt{double} values.
+
+\subsection{merge}
+
+\texttt{merge} can be used to merge two messages of the same type.
+
+<<>>=
+m1 <- new( tutorial.Person, name = "foobar" )
+m2 <- new( tutorial.Person, email = "foo@bar.com" )
+m3 <- merge( m1, m2 )
+writeLines( as.character( m3 ) )
+@
+
+\subsection{P}
+
+The \texttt{P} function is an alternative way to retrieve
+a message descriptor using its type name. It is not often used because
+of the lookup mechanism described in section~\ref{sec-lookup}.
+
+<<>>=
+P("tutorial.Person")
+new( P("tutorial.Person") )
+
+# but we can do this instead
+tutorial.Person
+new( tutorial.Person )
+@
+
+\section{Advanced Features}
+\subsection{Extensions}
+\label{sec-extensions}
+
+Extensions allow you to declare a range of field numbers in a message
+that are available for extension types.  This allows others to declare
+new fields for a given message type possibly in their own
+\texttt{.proto} files without having to edit the original file.  See
+\url{https://developers.google.com/protocol-buffers/docs/proto#extensions}.
+
+Notice that the last line of the \texttt{Person} message schema in
+\texttt{addressbook.proto} is the following line :
+
+\begin{verbatim}
+  extensions 100 to 199;
+\end{verbatim}
+
+This specifies that other users in other .proto files can use tag
+numbers between 100 and 199 for extention types of this message.
+
+For example, the following file \texttt{extend.proto}:
+
+<<echo=FALSE,print=FALSE>>=
+  extend.proto <- tempfile()
+  writeLines(c(
+               paste0('import "',
+                      name(tutorial.Person$fileDescriptor(), TRUE), '";'),
+               "package tutorial;",
+               paste0("extend Person {\n  optional string nationality = 100;\n}")),
+             extend.proto)
+@
+
+<<echo=FALSE>>=
+writeLines(readLines(extend.proto))
+@
+
+After importing this new \texttt{.proto} file with an extension
+defined, we can get or set the value of this extension in Messages of
+type \texttt{Person}.
+
+<<>>=
+library(RProtoBuf)
+readProtoFiles(extend.proto)
+person <- new(tutorial.Person, id=1, name="Murray")
+person
+person$setExtension(P("tutorial.nationality"), "USA")
+cat(as.character(person))
+person$getExtension(P("tutorial.nationality"))
+@
+
+The character output of this message places the extension type in
+brackets to differentiate it from other fields in the message, and so
+we know we need to use the \texttt{getExtension} method rather than a
+'\$' field extractor to get the value.
+
+\subsection{Descriptor lookup}
+\label{sec-lookup}
+
+The \texttt{RProtoBuf} package uses the user defined tables framework
+that is defined as part of the \texttt{RObjectTables} package available
+from the OmegaHat project.
+
+The feature allows \texttt{RProtoBuf} to install the
+special environment \emph{RProtoBuf:DescriptorPool} in the R search path.
+The environment is special in that, instead of being associated with a
+static hash table, it is dynamically queried by R as part of R's usual
+variable lookup. In other words, it means that when the R interpreter
+looks for a binding to a symbol (foo) in its search path,
+it asks to our package if it knows the binding "foo", this is then
+implemented by the \texttt{RProtoBuf} package by calling an internal
+method of the \texttt{protobuf} C++ library.
+
+\subsection{64-bit integer issues}
+\label{sec:int64}
+
+R does not have native 64-bit integer support.  Instead, R treats
+large integers as doubles which have limited precision.  For example,
+it loses the ability to distinguish some distinct integers:
+
+<<>>=
+2^53 == (2^53 + 1)
+@
+
+Protocol Buffers are frequently used to pass data between different
+systems, however, and most other systems these days have support for
+64-bit integers.  To work around this, RProtoBuf allows users to get
+and set 64-bit integer types by treating them as characters when
+running on a platform with a 64-bit long long type available.
+
+<<echo=FALSE,print=FALSE>>=
+if (!exists("protobuf_unittest.TestAllTypes",
+            "RProtoBuf:DescriptorPool")) {
+    unittest.proto.file <- system.file("unitTests", "data",
+                                       "unittest.proto",
+                                       package="RProtoBuf")
+    readProtoFiles(file=unittest.proto.file)
+}
+@
+
+If we try to set an int64 field in R to double values, we lose
+precision:
+
+% We comment out the raw Sweave here because it doesn't work on 32-bit
+% platforms but it is important to illustrate what the user is missing
+% out on so we hard code the output from a platform with 64-bit long
+% long type.
+%
+% <<>>=
+%  test <- new(protobuf_unittest.TestAllTypes)
+%  test$repeated_int64 <- c(2^53, 2^53+1)
+%  length(unique(test$repeated_int64))
+% @
+
+\begin{Schunk}
+\begin{Sinput}
+>   test <- new(protobuf_unittest.TestAllTypes)
+>   test$repeated_int64 <- c(2^53, 2^53+1)
+>   length(unique(test$repeated_int64))
+\end{Sinput}
+\begin{Soutput}
+[1] 1
+\end{Soutput}
+\end{Schunk}
+
+However, we can specify the values as character strings so that the
+C++ library on which RProtoBuf is based can store a true 64-bit
+integer representation of the data.
+
+% <<>>=
+%   test$repeated_int64 <- c("9007199254740992", "9007199254740993")
+% @
+\begin{Schunk}
+\begin{Sinput}
+>   test$repeated_int64 <- c("9007199254740992", "9007199254740993")
+\end{Sinput}
+\end{Schunk}
+
+When reading the value back into R, numeric types are returned by
+default, but when the full precision is required a character value
+will be returned if the \texttt{RProtoBuf.int64AsString} option is set
+to \texttt{TRUE}.
+
+% TODO: the if statement prevents us from seeing line by line
+% output inside the block (E.g. the output of test$repeated_int64).
+% This reduces the usefulness of this example when we are on a 64-bit
+% platform.  E.g. only the final ``2'' is returned.
+% <<echo=TRUE,print=TRUE>>=
+%  options("RProtoBuf.int64AsString" = FALSE)
+%  test$repeated_int64
+%  length(unique(test$repeated_int64))
+%  options("RProtoBuf.int64AsString" = TRUE)
+%  test$repeated_int64
+%  length(unique(test$repeated_int64))
+%@
+\begin{Schunk}
+\begin{Sinput}
+>   options("RProtoBuf.int64AsString" = FALSE)
+\end{Sinput}
+\begin{Soutput}
+$RProtoBuf.int64AsString
+[1] FALSE
+\end{Soutput}
+\begin{Sinput}
+>   test$repeated_int64
+\end{Sinput}
+\begin{Soutput}
+[1] 9.007199e+15 9.007199e+15
+\end{Soutput}
+\begin{Sinput}
+>   length(unique(test$repeated_int64))
+\end{Sinput}
+\begin{Soutput}
+[1] 1
+\end{Soutput}
+\begin{Sinput}
+>   options("RProtoBuf.int64AsString" = TRUE)
+\end{Sinput}
+\begin{Soutput}
+$RProtoBuf.int64AsString
+[1] FALSE
+\end{Soutput}
+\begin{Sinput}
+>   test$repeated_int64
+\end{Sinput}
+\begin{Soutput}
+[1] "9007199254740992" "9007199254740993"
+\end{Soutput}
+\begin{Sinput}
+>   length(unique(test$repeated_int64))
+\end{Sinput}
+\begin{Soutput}
+[1] 2
+\end{Soutput}
+\end{Schunk}
+
+<<echo=FALSE,print=FALSE>>=
+options("RProtoBuf.int64AsString" = FALSE)
+@
+
+\section{Other approaches}
+
+Saptarshi Guha wrote another package that deals with integration
+of protocol buffer messages with R, taking a different angle :
+serializing any R object as a message, based on a single catch-all
+\texttt{proto} file.  Saptarshi's package is available at
+\url{http://ml.stat.purdue.edu/rhipe/doc/html/ProtoBuffers.html}.
+
+Jeroen Ooms took a similar approach influenced by Saptarshi in his
+\texttt{RProtoBufUtils} package.  Unlike Saptarshi's package,
+RProtoBufUtils depends on RProtoBuf for underlying message operations.
+This package is available at
+\url{https://github.com/jeroenooms/RProtoBufUtils}.
+
+% Phillip Yelland wrote another implementation, currently proprietary,
+% that has significant speed advantages when querying fields from a
+% large number of protocol buffers, but is less user friendly for the
+% basic cases documented here.
+
+\section{Plans for future releases}
+Protocol buffers have a mechanism for remote procedure calls (rpc)
+that is not yet used by \texttt{RProtoBuf}, but we may one day
+take advantage of this by writing a protocol buffer message R server,
+and client code as well, probably based on the functionality
+of the \texttt{Rserve} package.
+
+Extensions have been implemented in RProtoBuf and have been
+extensively used and tested, but they are not currently described in
+this vignette.  Additional examples and documentation are needed for
+extensions.
+
+% \section{Troubleshouting}
+
+\section{Acknowledgments}
+
+% protobuf ?
+% saptarshi ?
+
+Some of the design of the package is based on the design of the
+\texttt{rJava} package by Simon Urbanek (dispatch on new, S4 class
+structures using external pointers, etc ...). We'd like to thank
+Simon for his indirect involvment on \texttt{RProtoBuf}.
+
+The user defined table mechanism, implemented by Duncan Temple Lang
+for the purpose of the \texttt{RObjectTables} package allowed the
+dynamic symbol lookup (see section~\ref{sec-lookup}). Many thanks
+to Duncan for this amazing feature.
+
+
+\end{document}
