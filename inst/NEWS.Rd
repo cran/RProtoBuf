@@ -2,6 +2,20 @@
 \title{News for Package \pkg{RProtoBuf}}
 \newcommand{\cpkg}{\href{http://CRAN.R-project.org/package=#1}{\pkg{#1}}}
 
+\section{Changes in RProtoBuf version 0.4.1 (2014-03-25)}{
+  \itemize{
+    \item Document and add a test for the deprecated group
+    functionality.
+    \item Add a \code{CITATION} file pointing to the arXiv.org preprint.
+    \item Fix a bug in the \code{show} method for \code{EnumDescriptor}
+    types.
+    \item Import all top-level enums from imported \code{.proto} files.
+    \item Removed duplicate enum value type from the unit tests that
+    caused problems with the most recent libprotobuf-2.5. (without option
+    allow_alias).
+  }
+}
+
 \section{Changes in RProtoBuf version 0.4.0 (2014-01-14)}{
   \itemize{
     \item Changes to support CRAN builds for MS Windows.

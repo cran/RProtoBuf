@@ -976,3 +976,12 @@ if (!exists("protobuf_unittest.TestAllTypes",
 options("RProtoBuf.int64AsString" = FALSE)
 
 
+###################################################
+### code chunk number 120: RProtoBuf-intro.Rnw:2170-2174
+###################################################
+test <- new(protobuf_unittest.TestAllTypes)
+test$optionalgroup$a <- 3
+test$optionalgroup$a
+cat(as.character(test))
+
+

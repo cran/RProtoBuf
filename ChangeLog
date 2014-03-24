@@ -1,9 +1,47 @@
+2014-03-25  Dirk Eddelbuettel  <edd@debian.org>
+
+ 	* DESCRIPTION (Version): Release 0.4.1
+
+2014-03-24  Murray Stokely  <mstokely@google.com>
+
+	* inst/unitTests/runit.int64.R (test.int64): Check
+	  Rcpp:::capabilities() to ensure we have long long support in Rcpp
+	  before trying to run the 64-bit integer tests.
+	* inst/unitTests/data/unittest.proto: Comment out
+	  TestEnumWithDupValue.  This causes problems with the newest
+	  libprotobuf-2.5 which now wants an option to be specified to
+	  enable enum aliasing like this.
+	* configure.in: if we can't find the libproto headers with the
+	  default CPPFLAGS/CXXFLAGS, manually add /usr/local/include and try
+	  again.
+	
+2014-03-10  Murray Stokely  <mstokely@google.com>
+
+	* src/DescriptorPoolLookup.cpp (rprotobuf): Import all top-level
+	  enums defined in an imported .proto file.
+	* src/rprotobuf.cpp (rprotobuf): Add a function to get the enum
+	  descriptor associated with a named enum.
+	* inst/unitTests/runit.enums.R (test.enums): Test that we import
+	  top-level enums from .proto files correctly.
+	* R/00classes.R (P): Correct a bug in the show() method for
+	  EnumDescriptor that prevented useful output in some contexts.
+
+2014-02-21  Murray Stokely  <mstokely@google.com>
+
+	* inst/unitTests/runit.messages.R (test.message): Add a test for
+	  the deprecated group feature which works fine with RProtoBuf.
+	  The type is converted to lower case, which users often forget.
+	* vignettes/RProtoBuf-intro.Rnw (subsection{Deprecated Feature:
+	  Protocol Buffer Groups}): document groups.
+	* inst/CITATION: Add a manual CITATION file pointing to the preprint
+ 	  on arxiv.org in addition to the normal auto-generated citation().
+
 2014-01-19  Dirk Eddelbuettel  <edd@debian.org>
 
 	* DESCRIPTION: Finalize release 0.4.0 with initial Windows support
 
 	* src/S4_classes.h: Adapt to S4 access function renaming in Rcpp
-	0.10.7 and later, with special thanks to Kevin Ushey
+	  0.10.7 and later, with special thanks to Kevin Ushey
 
 2014-01-13  Murray Stokely  <mstokely@google.com>
 
