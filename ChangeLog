@@ -1,3 +1,113 @@
+2014-12-10  Dirk Eddelbuettel  <edd@debian.org>
+
+ 	* DESCRIPTION (Version): Release 0.4.2
+
+2014-12-10  Jeroen Ooms  <jeroenooms@gmail.com>
+
+	* src/Makevars.win: Use new ProtoBuf 2.6.1 builds on Windows
+	* tools/winlibs.R: Helper function used for Windows build
+
+	* inst/unitTests/runit.int64.R: Fixed a windows bug
+
+2014-12-08  Jeroen Ooms  <jeroenooms@gmail.com>
+
+	* inst/proto/rexp.proto: Add a new type 'native'
+
+	* R/rexp_obj.R: Modify (un)serialize_pb to serialize() non-data types
+	as 'native' types
+
+2014-12-04  Dirk Eddelbuettel  <edd@debian.org>
+
+	* .travis.yml: Added after move to GitHub
+
+	* README.md: Added minimal first version with Travis badge
+
+2014-12-04  Murray Stokely  <mstokely@google.com>
+
+	* inst/unitTests/runit.int64.R: restore options on exit from this
+	  function to make the test indempotent.
+
+2014-12-01  Dirk Eddelbuettel  <edd@debian.org>
+
+	* man/Message-class.Rd: Completed documentation
+	* man/Descriptor-class.Rd: Ditto
+	* man/EnumDescriptor-class.Rd: Ditto
+
+2014-12-01  Murray Stokely  <mstokely@google.com>
+
+	* R/wrapper_ZeroCopyInputStream.R: Avoid file.create for getting
+	absolute path of a temporary file name (JSS reviewer feedback)
+	* R/serialize.R: Idem.
+
+2014-11-26  Murray Stokely  <mstokely@google.com>
+
+	Address feedback from anonymous reviewer for JSS to make this
+	package more complete:
+
+	* inst/unitTests/runit.serialize_pb.R: Add a test to verify that
+	we can serialize all 100+ built-in datasets with R and get an
+	identical object to the original once unserialized.
+
+	* R/rexp_obj.R: Serialize function, language, and environment
+	objects by just falling back to R's native serialization and using
+	raw bytes to store them.  This at least lets us round-trip encode
+	all native R types, even though these three only make sense in the
+	context of R.  Greatly simplify the can_serialize_pb function.
+
+	* inst/proto/rexp.proto: Add support for function, language, and
+	  environment objects.
+
+2014-11-25  Dirk Eddelbuettel  <edd@debian.org>
+
+	* vignettes/RProtoBuf-intro.Rnw: Applied a few corrections spotted by
+	Tim Hesterberg and communicated in email.
+
+2014-11-24  Murray Stokely  <mstokely@google.com>
+
+	* inst/unitTests/runit.golden.message.R: remove trailing
+	  whitespace.
+	* man/P.Rd: Improve output of example.
+
+2014-09-15  Murray Stokely  <mstokely@google.com>
+
+	Address feedback from anonymous reviewers for our Journal of
+	Statistical Software submission:
+	* src/wrapper_EnumDescriptor.cpp (rprotobuf): Correct the
+	  definition of as.list for EnumDescriptors to return a proper list
+	  instead of a named vector.
+	* man/aslist.Rd: clarify order of returned list for descriptor
+	  objects.
+	* NAMESPACE: add names as exported method.
+	* R/00classes.R (show): Update the default print methods to use
+	  cat() with fill=TRUE instead of show() to eliminate the confusing
+	  [1] since the classes in RProtoBuf are not vectorized.
+	* Make Descriptor and EnumDescriptor objects subsettable with
+	  "[[".
+	* Add length() method for Descriptor objects.
+	* Add names() method for Message, Descriptor, and EnumDescriptor
+	  objects.
+	* inst/unitTests/runit.enums.R (test.enums): Add test of
+	  subsetting an EnumDescriptor object.
+	* inst/unitTests/runit.descriptors.R (test.descriptor): Add test
+	  for subsetting of descriptor objects.
+	* DESCRIPTION (Version): Increment.
+
+2014-04-02  Murray Stokely  <mstokely@google.com>
+
+	Two patches from Karl Millar <kmillar@google.com>:
+	* src/S4_classes.h (rprotobuf): Change handling of
+	  S4_EnumDescriptor when passed a NULL pointer to just create empty
+	  object with empty name and full_name rather than setting to
+	  R_NilValue.
+	* src/wrapper_EnumDescriptor.cpp (rprotobuf): Change return value
+	  of getValue* functions on EnumDescriptor and return an
+	  EnumValueDescriptor or R_NilValue on failure.
+
+2014-04-01  Murray Stokely  <mstokely@google.com>
+
+	* tests/runUnitTests.R: Add improved checks to ensure R CMD CHECK
+	  fails if there are any errors in the tests, not just failures.
+
 2014-03-25  Dirk Eddelbuettel  <edd@debian.org>
 
  	* DESCRIPTION (Version): Release 0.4.1
@@ -14,7 +124,7 @@
 	* configure.in: if we can't find the libproto headers with the
 	  default CPPFLAGS/CXXFLAGS, manually add /usr/local/include and try
 	  again.
-	
+
 2014-03-10  Murray Stokely  <mstokely@google.com>
 
 	* src/DescriptorPoolLookup.cpp (rprotobuf): Import all top-level

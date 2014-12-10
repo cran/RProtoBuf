@@ -15,6 +15,10 @@
 # Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 
 test.int64 <- function() {
+    # Preserve option.
+    old.optval <- options("RProtoBuf.int64AsString")
+    on.exit(options(old.optval))
+
     if (!exists("protobuf_unittest.TestAllTypes",
                 "RProtoBuf:DescriptorPool")) {
         unittest.proto.file <- system.file("unitTests", "data",
@@ -25,12 +29,12 @@ test.int64 <- function() {
 
     if (.Machine$sizeof.longlong < 8) {
       warning("Can't test 64-bit int type on platform with sizeof(long long) < 8")
-      return
+      return()
     }
     if (is.na(Rcpp:::capabilities()["long long"]) ||
         Rcpp:::capabilities()["long long"] != TRUE) {
       warning("Can't test 64-bit int type without RCPP_LONG_LONG support.")
-      return
+      return()
     }
 
     a <- new(protobuf_unittest.TestAllTypes)

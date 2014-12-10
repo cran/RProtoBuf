@@ -34,22 +34,29 @@ RPB_FUNCTION_1(S4_Descriptor, METHOD(containing_type), Rcpp::XPtr<GPB::EnumDescr
     return S4_Descriptor(d->containing_type());
 }
 
-RPB_FUNCTION_2(S4_EnumValueDescriptor, METHOD(getValueByIndex), Rcpp::XPtr<GPB::EnumDescriptor> d,
+RPB_FUNCTION_2(SEXP, METHOD(getValueByIndex), Rcpp::XPtr<GPB::EnumDescriptor> d,
                int index) {
     if ((index >= 0) && (index < d->value_count())) {
         return S4_EnumValueDescriptor(d->value(index));
     } else {
-        return S4_EnumValueDescriptor(NULL);
+        return R_NilValue;
     }
 }
 
-RPB_FUNCTION_2(S4_EnumValueDescriptor, METHOD(getValueByNumber), Rcpp::XPtr<GPB::EnumDescriptor> d,
+RPB_FUNCTION_2(SEXP, METHOD(getValueByNumber), Rcpp::XPtr<GPB::EnumDescriptor> d,
                int i) {
-    return S4_EnumValueDescriptor(d->FindValueByNumber(i));
+    const GPB::EnumValueDescriptor* descriptor = d->FindValueByNumber(i);
+    if (descriptor)
+        return S4_EnumValueDescriptor(descriptor);
+    return R_NilValue;
 }
-RPB_FUNCTION_2(S4_EnumValueDescriptor, METHOD(getValueByName), Rcpp::XPtr<GPB::EnumDescriptor> d,
+
+RPB_FUNCTION_2(SEXP, METHOD(getValueByName), Rcpp::XPtr<GPB::EnumDescriptor> d,
                std::string name) {
-    return S4_EnumValueDescriptor(d->FindValueByName(name));
+    const GPB::EnumValueDescriptor* descriptor = d->FindValueByName(name);
+    if (descriptor)
+        return S4_EnumValueDescriptor(descriptor);
+    return R_NilValue;
 }
 
 RPB_FUNCTION_1(S4_Message, METHOD(as_Message), Rcpp::XPtr<GPB::EnumDescriptor> d) {
@@ -92,19 +99,18 @@ RPB_FUNCTION_2(bool, has_enum_name, Rcpp::XPtr<GPB::EnumDescriptor> d, std::stri
  * @param xp external pointer to a Descriptor
  * @return the descriptor as an R list
  */
-RPB_FUNCTION_1(Rcpp::IntegerVector, METHOD(as_list), Rcpp::XPtr<GPB::EnumDescriptor> d) {
+RPB_FUNCTION_1(Rcpp::List, METHOD(as_list), Rcpp::XPtr<GPB::EnumDescriptor> d) {
 
     int n = d->value_count();
-    Rcpp::IntegerVector values(n);
     Rcpp::CharacterVector names(n);
-
+    Rcpp::List res(n);
     for (int i = 0; i < n; i++) {
         const GPB::EnumValueDescriptor* value_d = d->value(i);
-        values[i] = value_d->number();
+        res[i] = value_d->number();
         names[i] = value_d->name();
     }
-    values.names() = names;
-    return values;
+    res.names() = names;
+    return res;
 }
 
 RPB_FUNCTION_1(Rcpp::CharacterVector, METHOD(getConstantNames), Rcpp::XPtr<GPB::EnumDescriptor> d) {
