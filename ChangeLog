@@ -1,3 +1,39 @@
+2016-08-29  Dirk Eddelbuettel  <edd@debian.org>
+
+	* DESCRIPTION (Version, Date): New release 0.4.5
+
+2016-08-16  Dirk Eddelbuettel  <edd@debian.org>
+
+	* DESCRIPTION (SystemRequirements): Add explicit note that Protocol
+	Buffers 3.0.0 are supported as well
+
+2016-08-15  Dirk Eddelbuettel  <edd@debian.org>
+
+	* DESCRIPTION (Version): Rolling minor version
+
+	* inst/proto/addressbook.proto: Added 'syntax = "proto2";'
+	* inst/proto/helloworld.proto: Idem
+	* inst/proto/rexp.proto: Idem
+	* inst/unitTests/data/bytes.proto: Idem
+	* inst/unitTests/data/encoding.proto: Idem
+	* inst/unitTests/data/nested.proto: Idem
+	* inst/unitTests/data/unittest.proto: Idem
+	* inst/unitTests/data/unittest_import.proto: Idem
+	* vignettes/proto/int64.proto: Idem
+
+	* inst/unitTests/runit.addressbook.R (test.ascii): Comment-out one
+	sub-test concerned with access under bad file modes
+
+2016-08-13  Dirk Eddelbuettel  <edd@debian.org>
+
+	* .travis.yml: Switch to using run.sh for Travis CI, also switch to
+	using a build matrix across ProtoBuf versions 2 and 3
+
+2016-07-19  Craig Radcliffe  <chradcliffe@gmail.com>
+
+	* configure.in: Make sure that CXXFLAGS is from the environment
+	when writing to src/Makevars
+
 2016-07-10  Dirk Eddelbuettel  <edd@debian.org>
 
 	* DESCRIPTION (Version): Release 0.4.4
