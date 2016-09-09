@@ -1,9 +1,31 @@
 \name{NEWS}
 \title{News for Package \pkg{RProtoBuf}}
-\newcommand{\cpkg}{\href{http://CRAN.R-project.org/package=#1}{\pkg{#1}}}
+\newcommand{\ghpr}{\href{https://github.com/eddelbuettel/rprotobuf/pull/#1}{##1}}
+\newcommand{\ghit}{\href{https://github.com/eddelbuettel/rprotobuf/issues/#1}{##1}}
+
+\section{Changes in RProtoBuf version 0.4.6 (2016-09-08)}{
+  \itemize{
+    \item Support for serializing zero-length objects was added (PR
+    \ghpr{18} addressing \ghit{13})
+    \item S4 objects are natively encoded (also PR \ghpr{18})
+    \item The vignette based on the JSS paper no longer uses a macro available
+    only with the R-devel version of jss.cls, and hence builds on all R versions
+  }
+}
+
+\section{Changes in RProtoBuf version 0.4.5 (2016-08-29)}{
+  \itemize{
+    \item Support for version 3 of the Protcol Buffers API
+    \item Added 'syntax = "proto2";' to all proto files (PR \ghpr{17})
+    \item Updated Travis CI script to test against both versions 2 and 3
+    using custom-built .deb packages of version 3 (PR \ghpr{16})
+    \item Improved build system with support for custom CXXFLAGS (Craig
+    Radcliffe in PR \ghpr{15}) 
+  }
+}
 
 \section{Changes in RProtoBuf version 0.4.4 (2016-07-10)}{
-  \itemize{
+   \itemize{
     \item New vignette based on JSS publication (v71 i02)
     \item Some documentation enhancements were made, as well as other
     minor cleanups to file modes and operations
@@ -41,7 +63,7 @@
     return a proper list instead of a named vector.
     \item Update the default print methods to use
     \code{cat()} with \code{fill=TRUE} instead of \code{show()} to eliminate the confusing
-    \code{[1]} since the classes in \cpkg{RProtoBuf} are not vectorized.
+    \code{[1]} since the classes in \pkg{RProtoBuf} are not vectorized.
     \item Add support for serializing function, language, and
       environment objects by falling back to R's native serialization
       with \code{serialize_pb} and \code{unserialize_pb} to make it
@@ -124,7 +146,7 @@
     been submitted to R-Forge with details about the coding standards
     and how they are enforced with Emacs and clang-format.
     \item Applied changes suggested by Kevin Ushey to the \code{S4}
-    class handling to support both the currently released \cpkg{Rcpp} as
+    class handling to support both the currently released \CRANpkg{Rcpp} as
     well as the currently pending next version.
   }
 }
@@ -137,12 +159,12 @@
     a message of the wrong type instead of causing a C++ check failure
     that terminates the Rsession.
     \item Change object table lookup slightly to allow users to use the
-    \code{<<-} operator in code using \cpkg{RProtoBuf} without hitting a
+    \code{<<-} operator in code using \pkg{RProtoBuf} without hitting a
     \code{stop()} error in the lookup routine.
     \item Add missing \code{enum_type} method and improve show method for
     EnumValueDescriptors.
     \item Improve documentation and tests for all of the above.
-    \item Rewrote \code{tests/} script calling \cpkg{RUnit} tests
+    \item Rewrote \code{tests/} script calling \CRANpkg{RUnit} tests
   }
 }
 
