@@ -3,6 +3,24 @@
 \newcommand{\ghpr}{\href{https://github.com/eddelbuettel/rprotobuf/pull/#1}{##1}}
 \newcommand{\ghit}{\href{https://github.com/eddelbuettel/rprotobuf/issues/#1}{##1}}
 
+\section{Changes in RProtoBuf version 0.4.9 (2017-03-06)}{
+  \itemize{
+    \item A new file \code{init.c} was added with calls to
+    \code{R_registerRoutines()} and \code{R_useDynamicSymbols()}
+    \item Symbol registration is enable in \code{useDynLib}
+    \item Several missing \code{PACKAGE=} arguments were added to
+    the corresponding \code{.Call} invocations
+    \item Two (internal) C++ functions were renamed with suffix
+    \code{_cpp} to disambiguate them from R functions with the same name
+    \item All of above were part of \ghpr{26}
+    \item Some editing corrections were made to the introductory
+    vignette (David Kretch in \ghpr{25})
+    \item The `configure.ac` file was updated, and renamed from the
+    older converntion `configure.in`, along with `src/Makevars`. (PR
+    \ghpr{24} fixing \ghit{23}) 
+  }
+}
+
 \section{Changes in RProtoBuf version 0.4.8 (2017-01-17)}{
   \itemize{
     \item Windows builds now use the proto3 library as well (PR \ghpr{21}
