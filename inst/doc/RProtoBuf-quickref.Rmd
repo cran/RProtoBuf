@@ -1,0 +1,156 @@
+---
+title: \pkg{RProtoBuf} Quick Reference Guide
+
+# Use letters for affiliations
+author:
+  - name: Dirk Eddelbuettel
+    affiliation: a
+  - name: Romain François
+    affiliation: b
+  - name: Murray Stokely
+    affiliation: c
+    
+address:
+  - code: a
+    address: \url{http://dirk.eddelbuettel.com}
+  - code: b
+    address: \url{https://romain.rbind.io/}
+  - code: c
+    address: \url{https://stokely.org}
+
+# For footer text
+lead_author_surname: Eddelbuettel, François and Stokely
+
+# Place DOI URL or CRAN Package URL here
+doi: "https://cran.r-project.org/package=RProtoBuf"
+
+# Customize footer, eg by referencing the vignette
+footer_contents: "RProtoBuf Vignette"
+
+# Produce a pinp document
+output: pinp::pinp
+
+header-includes: >
+  \newcommand{\proglang}[1]{\textsf{#1}}
+  \newcommand{\pkg}[1]{\textbf{#1}}
+  \newcommand{\faq}[1]{FAQ~\ref{#1}}
+  \newcommand{\rdoc}[2]{\href{http://www.rdocumentation.org/packages/#1/functions/#2}{\code{#2}}}
+  \newcommand{\sugar}{\textsl{Rcpp sugar}~}
+
+vignette: >
+  %\VignetteIndexEntry{RProtoBuf-quickref}
+  %\VignetteKeywords{RProtoBuf, Protocol Buffers, package}
+  %\VignetteDepends{RProtoBuf}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r init, echo=FALSE}
+library("RProtoBuf")
+options("width"=48)
+```
+
+## Example proto file
+
+```{r readab, echo=FALSE, comment=""}
+ab.proto <- system.file("proto", "addressbook.proto", package = "RProtoBuf")
+writeLines(readLines(ab.proto))
+```
+
+## Read proto description files
+
+```{r readproto, eval=FALSE}
+readProtoFiles("somefile.proto")
+readProtoFiles(dir = somedir)
+readProtoFiles(package = AnRPackage)
+```
+
+## Create a message
+
+```{r createmsg}
+message <- new(tutorial.Person, id = 0,
+               name = "Romain Francois",
+               email = "francoisromain@free.fr")
+```
+
+
+## Serialize a message to a file or binary connection
+
+```{r serialize}
+# to a file
+tf1 <- tempfile()
+message$serialize(tf1)
+
+# to a binary connection
+tf2 <- tempfile()
+con <- file(tf2, open = "wb")
+message$serialize(con)
+close(con)
+
+# retrieve the payload
+message$serialize(NULL)
+```
+
+## Read a message from a file or binary connection}
+
+```{r readbin, eval=FALSE}
+# from a file
+tutorial.Person$read(tf1)
+# from a connection
+con <- file(tf2, open = "rb")
+tutorial.Person$read(con)
+close(con)
+```
+
+## Get/Set fields
+
+```{r getset}
+email <- message$email
+message$id <- 2
+message[["name"]] <- "Romain"
+id <- message[[2]] # tag number for 'id'
+```
+
+
+## Message methods
+
+\begin{center}
+\begin{small}
+\begin{tabular}{cp{2.2in}}
+\hline
+\texttt{has} & Indicates if a message has a given field.   \\
+\texttt{clone} & Creates a clone of the message \\
+\texttt{isInitialized}  & Indicates if a message has all its required fields set\\
+\texttt{serialize} & serialize a message to a file or a binary connection or retrieve the message payload as a raw vector\\
+\texttt{clear}  & Clear one or several fields of a message, or the entire message\\
+\texttt{size}  & The number of elements in a message field\\
+\texttt{bytesize}  & The number of bytes the message would take once serialized\\
+\hline
+\texttt{swap}  & swap elements of a repeated field of a message\\
+\texttt{set}  & set elements of a repeated field\\
+\texttt{fetch}  & fetch elements of a repeated field\\
+\texttt{add}  & add elements to a repeated field \\
+\hline
+\texttt{str}  & the R structure of the message\\
+\texttt{as.character}  & character representation of a message\\
+\texttt{toString}  & character representation of a message (same as \texttt{as.character}) \\
+\texttt{update}  & updates several fields of a message at once\\
+\texttt{descriptor} & get the descriptor of the message type of this message\\
+\hline
+\end{tabular}
+\end{small}
+\end{center}
+
+
+## More info
+
+\begin{center}
+\begin{small}
+\begin{tabular}{cp{2.2in}}
+Full Vignette & \verb|vignette("RProtoBuf-intro")| \\
+JSS Paper & \verb|vignette("RProtoBuf-paper")| \\
+Protocol Buffers & \url{https://developers.google.com/protocol-buffers/} \\
+RProtoBuf & \url{https://github.com/eddelbuettel/rprotobuf}\\
+\end{tabular}
+\end{small}
+\end{center}

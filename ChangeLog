@@ -1,3 +1,35 @@
+2017-10-03  Dirk Eddelbuettel  <edd@debian.org>
+
+	* DESCRIPTION (Version, Date): Release 0.4.11
+
+2017-10-02  Dirk Eddelbuettel  <edd@debian.org>
+
+	* DESCRIPTION: Minor edit to suppress another NOTE from R CMD check
+	* README.md: Idem
+
+2017-10-01  Dirk Eddelbuettel  <edd@debian.org>
+
+	* vignettes/RProtoBuf-intro.Rmd: Renamed, now uses Rmd via pinp
+	* vignettes/RProtoBuf-quickref.Rmd: Idem
+
+	* DESCRIPTION: Added pinp package, rolled minor version, use doi
+	in Description
+
+	* cleanup: Adjusted and updated
+
+	* .travis.yml (install): Add r-cran-pinp
+
+2017-08-26  Dirk Eddelbuettel  <edd@debian.org>
+
+	* .travis.yml (before_install): Use https for curl fetch
+
+2017-08-14  Dirk Eddelbuettel  <edd@debian.org>
+
+	* DESCRIPTION (Version, Date): Roll minor version
+
+	* src/S4_classes.h: Initialize S4 base class in copy constructor
+	for S4_ArrayOutputStream class
+
 2017-08-13  Dirk Eddelbuettel  <edd@debian.org>
 
 	* DESCRIPTION (Version, Date): Release 0.4.10
