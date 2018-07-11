@@ -1,3 +1,64 @@
+2018-07-11  Dirk Eddelbuettel  <edd@debian.org>
+
+	* DESCRIPTION (Version, Date): Release 0.4.11
+
+2018-07-08  Dirk Eddelbuettel  <edd@debian.org>
+
+	* src/wrapper_Message.cpp (rprotobuf): Properly reference std::vector
+	(as noticed by Brian Ripley with protobuf 3.6)
+
+2018-06-25  Jeroen Ooms  <jeroenooms@gmail.com>
+
+	* src/Makevars.win: update Windows build to protobuf v3.5.1 to
+	support upcoming gcc-8 toolchain.
+
+2018-05-21  Siddhartha Bagaria  <bagaria.siddhartha@gmail.com>
+
+	* src/DescriptorPoolLookup.cpp: New reset() function
+	* src/DescriptorPoolLookup.h: Idem
+	* src/RSourceTree.cpp: New directory removal function
+	* src/RSourceTree.h: Idem
+	* src/init.c: Register new resetDescriptorPool_cpp functions
+	* src/rprotobuf.cpp: callable resetDescriptorPool_cpp() function
+	* man/readProtoFiles.Rd: Added documentation
+	* R/internals.R: Add R-callable resetDescriptorPool()
+	* NAMESPACE: Corresponding export
+
+	* inst/unitTests/data/cyclical/*: Unit test infrastructure
+	* inst/unitTests/data/recursive/*: Idem
+	* inst/unitTests/data/subdir/*: Idem
+	* inst/unitTests/data/unittest.proto: Added proto definition
+	* inst/unitTests/runit.import.R: New tests
+
+2018-05-20  Dirk Eddelbuettel  <edd@debian.org>
+
+	* DESCRIPTION (Version, Date): Roll minor version
+
+	* man/readProtoFiles.Rd: One minor correction, and some whitespace
+	and indentation cleanups
+
+2018-04-18  Dirk Eddelbuettel  <edd@debian.org>
+
+	* vignettes/RProtoBuf-paper.Rnw: Two updates for OpenCPU
+
+2018-01-19  Siddhartha Bagaria  <bagaria.siddhartha@gmail.com>
+
+	* R/internals.R: New function readProtoFiles2 to use directory
+	argument along with pattern similar to protoc behavior; also
+	add recursive argument to readProtoFiles
+	* man/readProtoFiles.Rd: Documentation for readProtoFiles2
+
+2017-11-20  Dirk Eddelbuettel  <edd@debian.org>
+
+	* DESCRIPTION (Version, Date): Roll minor version
+
+	* inst/unitTests/runit.serialize_pb.R: Added unit test
+
+2017-11-20  Jeffrey Shen  <jeffrey.shen@displayr.com>
+
+	* R/rexp_obj.R: Added test to avoid infinite recursion if sub
+	indexing list returns the list
+
 2017-10-03  Dirk Eddelbuettel  <edd@debian.org>
 
 	* DESCRIPTION (Version, Date): Release 0.4.11

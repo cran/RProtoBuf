@@ -283,7 +283,7 @@ par("mar"=old.mar)
 
 
 ###################################################
-### code chunk number 24: RProtoBuf-paper.Rnw:1324-1340 (eval = FALSE)
+### code chunk number 24: RProtoBuf-paper.Rnw:1324-1338 (eval = FALSE)
 ###################################################
 ## library("httr")
 ## library("RProtoBuf")
@@ -292,11 +292,9 @@ par("mar"=old.mar)
 ## payload <- serialize_pb(args, NULL)
 ## 
 ## req <- POST (
-##   url = "https://demo.ocpu.io/stats/R/rnorm/pb",
+##   url = "https://cloud.opencpu.org/ocpu/library/stats/R/rnorm/pb",
 ##   body = payload,
-##   add_headers (
-##     "Content-Type" = "application/x-protobuf"
-##   )
+##   add_headers ("Content-Type" = "application/protobuf")
 ## )
 ## 
 ## output <- unserialize_pb(req$content)
@@ -304,7 +302,7 @@ par("mar"=old.mar)
 
 
 ###################################################
-### code chunk number 25: RProtoBuf-paper.Rnw:1344-1347 (eval = FALSE)
+### code chunk number 25: RProtoBuf-paper.Rnw:1342-1345 (eval = FALSE)
 ###################################################
 ## fnargs <- unserialize_pb(inputmsg)
 ## val <- do.call(stats::rnorm, fnargs)

@@ -3,10 +3,24 @@
 \newcommand{\ghpr}{\href{https://github.com/eddelbuettel/rprotobuf/pull/#1}{##1}}
 \newcommand{\ghit}{\href{https://github.com/eddelbuettel/rprotobuf/issues/#1}{##1}}
 
+\section{Changes in RProtoBuf version 0.4.12 (2018-07-11)}{
+  \itemize{
+    \item Recursive serialization of sublists returning themselves is
+    now recognised (Jeffrey Shen in \ghpr{38} fixing \ghit{37})
+    \item New function \code{readProtoFiles2} to be consistent with
+    \code{protoc} (Siddhartha Bagaria in \ghpr{40} fixing \ghit{39})
+    \item Update Windows binary library used (Maciej Lach and Jeroen
+    Ooms in \ghpr{42} and follow-up commits)
+    \item New unit tests for new functionality (Siddhartha Bagaria in
+    \ghpr{45})
+  }
+}
+
 \section{Changes in RProtoBuf version 0.4.11 (2017-10-03)}{
   \itemize{
-    \item The \code{RProtoBuf-info} vignette was converted to Rmarkdown
-    using the templates and style file from the pinp package.
+    \item The \code{RProtoBuf-intro} and \code{RProtoBuf-quickref}
+    vignettes were converted to Rmarkdown using the templates and style
+    file from the pinp package.
     \item A few minor internal upgrades
   }
 }
