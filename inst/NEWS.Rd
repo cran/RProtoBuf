@@ -3,6 +3,18 @@
 \newcommand{\ghpr}{\href{https://github.com/eddelbuettel/rprotobuf/pull/#1}{##1}}
 \newcommand{\ghit}{\href{https://github.com/eddelbuettel/rprotobuf/issues/#1}{##1}}
 
+\section{Changes in RProtoBuf version 0.4.13 (2018-11-03)}{
+  \itemize{
+    \item The \code{configure} setup is more robust with respect to the
+    C++ setup (CRAN request).
+    \item \code{POSIXlt} elements are now properly serialized too
+    (Jeffrey Shen in \ghpr{48} and \ghpr{50} fixing \ghit{47})
+    \item Added two Dockerfiles for continuous integration and use; see
+    \href{https://cloud.docker.com/swarm/rprotobuf/repository/list}{this
+      url} for more.
+  }
+}
+
 \section{Changes in RProtoBuf version 0.4.12 (2018-07-11)}{
   \itemize{
     \item Recursive serialization of sublists returning themselves is

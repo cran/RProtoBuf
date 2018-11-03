@@ -1,6 +1,56 @@
+2018-11-03  Dirk Eddelbuettel  <edd@debian.org>
+
+	* DESCRIPTION (Version, Date): Release 0.4.13
+
+2018-11-02  Dirk Eddelbuettel  <edd@debian.org>
+
+	* tests/runUnitTests.R: Rewritten matching other packages
+
+	* man/readASCII.Rd: Set examples to \dontrun{} as occasional error
+	from a remaining open connection seen
+
+2018-09-08  Dirk Eddelbuettel  <edd@debian.org>
+
+	* .travis.yml: Rewritten to use rprotobuf/ci Docker container
+
+	* docker/run/Dockerfile: Correction to Dockerfile
+
+2018-09-07  Dirk Eddelbuettel  <edd@debian.org>
+
+	* docker/run/Dockerfile: Added Dockerfile for deployment
+
+2018-09-06  Dirk Eddelbuettel  <edd@debian.org>
+
+	* DESCRIPTION (Version, Date): Roll minor version
+
+	* .Rbuildignore: Ignore GTAGS, GRTAGS, GPATH from GNU global
+	* .gitignore: Idem
+
+	* docker/ci/Dockerfile: Added Dockerfile for CI use
+
+2018-09-06  Jeffrey Shen  <jeffrey.shen@displayr.com>
+
+	* R/rexp_obj.R: Refinement for POSIXlt treatment
+
+2018-09-05  Jeffrey Shen  <jeffrey.shen@displayr.com>
+
+	* R/rexp_obj.R: Unclass POSIXlt before converting them
+	* inst/unitTests/runit.serialize_pb.R: Unit test
+
+2018-09-02  Dirk Eddelbuettel  <edd@debian.org>
+
+	* .travis.yml: Enforce R version 3.4 for now as the PPA we need for
+	the Protocol Buffers library has r-cran-* packages built for R 3.4
+
+2018-07-25  Dirk Eddelbuettel  <edd@debian.org>
+
+	* configure.ac: Set CXX and CXXFLAGS values by calling R to reflect
+	values in Makeconf used by R  [CRAN request]
+	* configure: Idem
+
 2018-07-11  Dirk Eddelbuettel  <edd@debian.org>
 
-	* DESCRIPTION (Version, Date): Release 0.4.11
+	* DESCRIPTION (Version, Date): Release 0.4.12
 
 2018-07-08  Dirk Eddelbuettel  <edd@debian.org>
 
