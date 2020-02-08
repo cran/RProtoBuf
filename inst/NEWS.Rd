@@ -3,6 +3,15 @@
 \newcommand{\ghpr}{\href{https://github.com/eddelbuettel/rprotobuf/pull/#1}{##1}}
 \newcommand{\ghit}{\href{https://github.com/eddelbuettel/rprotobuf/issues/#1}{##1}}
 
+\section{Changes in RProtoBuf version 0.4.15 (2020-02-08)}{
+  \itemize{
+    \item Repeated Message and Group objects are now returned correctly
+    (Dirk in \ghpr{64} fixing \ghit{62}).
+    \item The unit tests are now run by \pkg{tinytest} (Dirk in \ghpr{65}).
+    \item The vignettes are now included pre-made (Dirk in \ghpr{67}).
+  }
+}
+
 \section{Changes in RProtoBuf version 0.4.14 (2019-06-30)}{
   \itemize{
     \item An \code{all.equal.Message} method was added to avoid a
