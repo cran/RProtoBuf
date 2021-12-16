@@ -1,3 +1,88 @@
+2021-12-15  Dirk Eddelbuettel  <edd@debian.org>
+
+	* DESCRIPTION (Version, Date): Release 0.4.18
+
+	* man/*Rd: Update a number of URLs
+
+2021-12-14  Dirk Eddelbuettel  <edd@debian.org>
+
+	* DESCRIPTION (Version): Roll minor version and date
+
+	* src/Makevars.ucrt: Applied patch by Tomas Kalibera that is part of
+	his changes for the Windows utf8-enhabced ucrt3 builds of R 4.2.0
+
+2021-10-10  Dirk Eddelbuettel  <edd@debian.org>
+
+	* README.md: Update JSS article url to doi form per JSS request,
+	switch to shorter https://doi.org/ base
+
+2021-10-01  Dirk Eddelbuettel  <edd@debian.org>
+
+ 	* .github/workflows/docker.yaml (on): Restrict Docker rebuilds to
+	pushes to master branch
+
+2021-09-26  Dirk Eddelbuettel  <edd@debian.org>
+
+	* .github/workflows/docker.yaml: Add action to build and push
+	containers with cron set to monthly schedule
+
+2021-06-27  Jeroen Ooms  <jeroen@berkeley.edu>
+
+	* src/Makevars.win: Support UCRT build
+	* src/Makevars.ucrt: Idem
+
+2021-06-11  Dirk Eddelbuettel  <edd@debian.org>
+
+	* DESCRIPTION (Version, Date): Roll minor version
+
+	* .editorconfig: Added
+
+2021-06-10  Vitalie Spinu <spinuvit@gmail.com>
+
+	* R/debug_string.R: Support extra toJSON format arguments
+	* R/00classes.R: Idem
+	* src/wrapper_Message.cpp: Idem
+	* src/init.c: Idem
+	* man/Message-class.Rd: Document new parameters
+
+2021-06-01  Dirk Eddelbuettel  <edd@debian.org>
+
+	* DESCRIPTION (URL): Add package page to URL field
+
+2021-01-09  Dirk Eddelbuettel  <edd@debian.org>
+
+	* DESCRIPTION (Version): Roll minor version and date
+
+	* DESCRIPTION (Imports): Remove RCurl used for rpc
+	* NAMESPACE: Remove 'rpc' class and 'invoke' method
+	* R/00classes.R: Comment-out removed class and method
+	* deprecated/R/http.handler.R: Moved from R/
+	* deprecated/R/rpc.R: Idem
+	* deprecated/man/RpcHTTP-class.Rd: Moved from man/
+	* deprecated/man/invokeLocally.Rd: Idem
+	* .Rbuildignore: Added deprecated/
+
+        * .github/workflows/ci.yaml: Add CI runner using r-ci
+	* README.md: Add new badge
+
+2020-08-16  Dirk Eddelbuettel  <edd@debian.org>
+
+	* README.md: Added JSS badge
+
+2020-06-15  Dirk Eddelbuettel  <edd@debian.org>
+
+	* .travis.yml: Switch to bionic, change to derive package and version
+
+2020-05-28  Dirk Eddelbuettel  <edd@debian.org>
+
+	* DESCRIPTION (Version, Date): Roll minor version
+
+2020-05-28  Adam Cozzette  <acozzette@google.com>
+
+	* src/wrapper_ServiceDescriptor.cpp: Support FindMethodByName() taking
+	std::string_view
+	* src/RcppMacros.h: Idem
+
 2020-03-26  Dirk Eddelbuettel  <edd@debian.org>
 
 	* DESCRIPTION (Version, Date): Release 0.4.17
@@ -2655,4 +2740,3 @@
 
 	* [r1] /README, /pkg, /www, /www/index.php: R-Forge: updated
 	  repository structure
-

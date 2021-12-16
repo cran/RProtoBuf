@@ -3,14 +3,33 @@
 \newcommand{\ghpr}{\href{https://github.com/eddelbuettel/rprotobuf/pull/#1}{##1}}
 \newcommand{\ghit}{\href{https://github.com/eddelbuettel/rprotobuf/issues/#1}{##1}}
 
-\section{Changes in RProtoBuf version 0.4.17 (2020-03-xx)}{
+\section{Changes in RProtoBuf version 0.4.18 (2021-12-15)}{
+  \itemize{
+    \item Support \code{string_view}  in \code{FindMethodByName()} (Adam
+    Cozzette in \ghpr{72}).
+    \item CI use was updated first at Travis, later at GitHub and
+    now uses \href{https://eddelbuettel.github.io/r-ci/}{r-ci} (Dirk in
+    \ghpr{74} and (parts of) \ghpr{76}).
+    \item The (to the best of our knowledge) unused minimal RPC
+    mechanism has been removed, retiring one method and one class as
+    well as the import of the \pkg{RCurl} package (Dirk in \ghpr{76}).
+    \item Two extra parameters are now supported in the \code{toJSON}
+    conversion (Vitali Spinu in \ghpr{79})
+    \item The \code{toJSON()} method supports two (upstream) formatting
+    toggles (Vitali Spinu in \ghpr{79} with minor edit by Dirk).
+    \item Windows UCRT builds are now supported (Jeroen in \ghpr{81},
+    Dirk and Tomas Kalibera in \ghpr{82}).
+  }
+}
+
+\section{Changes in RProtoBuf version 0.4.17 (2020-03-26)}{
   \itemize{
     \item Condition use of \code{ByteSizeLong()} on building with ProtoBuf
     3.6.0 or later (Dirk in \ghpr{71} fixing \ghit{70}).
     \item The JSON unit tests are skipped if ProtoBuf 2.* is used (Dirk,
     also \ghpr{71}).
     \item The \code{configure} script now extracts the version from the
-    \code{DESCRIPTION} file ( (Dirk, also \ghpr{71}).
+    \code{DESCRIPTION} file (Dirk, also \ghpr{71}).
   }
 }
 
@@ -49,7 +68,7 @@
     \item \code{POSIXlt} elements are now properly serialized too
     (Jeffrey Shen in \ghpr{48} and \ghpr{50} fixing \ghit{47})
     \item Added two Dockerfiles for continuous integration and use; see
-    \href{https://cloud.docker.com/swarm/rprotobuf/repository/list}{this
+    \href{https://hub.docker.com/swarm/rprotobuf/repository/list}{this
       url} for more.
   }
 }
@@ -99,7 +118,7 @@
     vignette (David Kretch in \ghpr{25})
     \item The `configure.ac` file was updated, and renamed from the
     older converntion `configure.in`, along with `src/Makevars`. (PR
-    \ghpr{24} fixing \ghit{23}) 
+    \ghpr{24} fixing \ghit{23})
   }
 }
 
@@ -134,7 +153,7 @@
     \item Updated Travis CI script to test against both versions 2 and 3
     using custom-built .deb packages of version 3 (PR \ghpr{16})
     \item Improved build system with support for custom CXXFLAGS (Craig
-    Radcliffe in PR \ghpr{15}) 
+    Radcliffe in PR \ghpr{15})
   }
 }
 
@@ -340,7 +359,7 @@
     }
     \item Added Murray to Authors: field in DESCRIPTION
     \item Removed old and unconvincing example on RProtoBuf for storage
-    and serialization in an imagined HighFrequencyFinance context 
+    and serialization in an imagined HighFrequencyFinance context
   }
 }
 
@@ -353,7 +372,7 @@
       \item test a a protocol buffer for missing required fields before
       serializing it, also add a unit test
       \item add a small stylistic fix and examples to the 'add.Rd'
-      manual page 
+      manual page
     }
     \item Moved inst/doc/ to vignettes/ per newer CRAN Policy
   }
@@ -362,7 +381,7 @@
   \itemize{
     \item Applied several patches kindly supplied by Murray Stokely to
     \itemize{
-      \item properly work with repeated strings 
+      \item properly work with repeated strings
       \item correct C++ function naming in a few instances
       \item add an example of ascii export/import of messages
     }
@@ -373,7 +392,7 @@
 \section{Changes in RProtoBuf version 0.2.3 (2011-04-12)}{
   \itemize{
     \item Protect UINT64 and INT64 with '#ifdef RCPP_HAS_LONG_LONG' which
-    itself is valid with either g++ <= 4.4, or newer versions if the 
+    itself is valid with either g++ <= 4.4, or newer versions if the
     -std=c++0x is used
     \item The documentation Makefile now uses the $R_HOME environment variable
     \item The documentation Makefile no longer calls clean in the all
@@ -384,12 +403,12 @@
   \itemize{
     \item Applied two patches by Murray Stokely which
     \itemize{
-      \item correct a typo preventing some functions from being called, 
-      \item add bounds checking in call to google protobuf library, 
-      \item add a new name method 
+      \item correct a typo preventing some functions from being called,
+      \item add bounds checking in call to google protobuf library,
+      \item add a new name method
       \item add a tiny unit test for the above
       \item add more graceful error handling
-      \item add support for import patterns other than .proto$, 
+      \item add support for import patterns other than .proto$,
       \item add simple reading file that does not exist (exception) test
       \item add simple repeated field unit test
     }

@@ -70,9 +70,9 @@ setClass( "Message",  representation(
 
 # rpc
 
-setClass( "RpcHTTP", representation(
-	host = "character", port = "integer", root = "character"
-), prototype = list( host = "127.0.0.1", port = 4444L, root = "" ) )
+#setClass( "RpcHTTP", representation(
+#	host = "character", port = "integer", root = "character"
+#), prototype = list( host = "127.0.0.1", port = 4444L, root = "" ) )
 
 # streams
 setClass( "ZeroCopyInputStream", representation(
@@ -189,7 +189,9 @@ setMethod("$", "Message", function(x, name) {
 		"set" = function(...) set( x, ... ),
 		"fetch" = function(...) fetch(x, ... ),
 		"toString" = function(...) toString( x, ... ),
-		"toJSON" = function(...) toJSON( x, ... ),
+                "toJSON" = function(preserve_proto_field_names = FALSE, always_print_primitive_fields = FALSE, ...)
+            		toJSON(x, preserve_proto_field_names = preserve_proto_field_names,
+                           always_print_primitive_fields = always_print_primitive_fields, ... ),
 		"add" = function(...) add( x, ...),
 
 		"serialize" = function(...) serialize( x, ... ),
@@ -319,7 +321,7 @@ setMethod( "$", "EnumValueDescriptor", function(x, name ){
 
 setMethod( "$", "MethodDescriptor", function(x, name ){
 	switch( name,
-		"invoke" = function(...) invoke(x, ...),
+		#"invoke" = function(...) invoke(x, ...),
 		"implementation" = if( x@name %in% names(IMPLEMENTATIONS) ){
 			get( x@name, IMPLEMENTATIONS )
 		},
@@ -334,14 +336,14 @@ setMethod( "$", "MethodDescriptor", function(x, name ){
 	)
 } )
 
-setMethod( "$<-", "MethodDescriptor", function(x, name, value ){
-
-	if( identical( name, "implementation" ) ){
-		check_valid_implementation( x, value )
-		assign( x@name, value, envir = IMPLEMENTATIONS )
-	}
-	x
-} )
+#setMethod( "$<-", "MethodDescriptor", function(x, name, value ){
+#
+#	if( identical( name, "implementation" ) ){
+#		check_valid_implementation( x, value )
+#		assign( x@name, value, envir = IMPLEMENTATIONS )
+#	}
+#	x
+#} )
 
 setMethod( "$", "ZeroCopyInputStream", function(x, name ){
 	switch( name,

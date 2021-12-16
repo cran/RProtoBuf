@@ -1,11 +1,13 @@
 ## RProtoBuf: R Interface to [Google Protocol Buffers](https://developers.google.com/protocol-buffers/)
 
-[![Build Status](https://travis-ci.org/eddelbuettel/rprotobuf.svg)](https://travis-ci.org/eddelbuettel/rprotobuf) 
-[![License](https://eddelbuettel.github.io/badges/GPL2+.svg)](https://www.gnu.org/licenses/gpl-2.0.html) 
-[![CRAN](https://www.r-pkg.org/badges/version/RProtoBuf)](https://cran.r-project.org/package=RProtoBuf) 
-[![Dependencies](https://tinyverse.netlify.com/badge/RProtoBuf)](https://cran.r-project.org/package=RProtoBuf) 
+[![Build Status](https://travis-ci.org/eddelbuettel/rprotobuf.svg)](https://travis-ci.org/eddelbuettel/rprotobuf)
+[![CI](https://github.com/eddelbuettel/rprotobuf/workflows/ci/badge.svg)](https://github.com/eddelbuettel/rprotobuf/actions?query=workflow%3Aci)
+[![License](https://eddelbuettel.github.io/badges/GPL2+.svg)](https://www.gnu.org/licenses/gpl-2.0.html)
+[![CRAN](https://www.r-pkg.org/badges/version/RProtoBuf)](https://cran.r-project.org/package=RProtoBuf)
+[![Dependencies](https://tinyverse.netlify.com/badge/RProtoBuf)](https://cran.r-project.org/package=RProtoBuf)
 [![Downloads](https://cranlogs.r-pkg.org/badges/RProtoBuf?color=brightgreen)](https://www.r-pkg.org/pkg/RProtoBuf)
 [![Last Commit](https://img.shields.io/github/last-commit/eddelbuettel/rprotobuf)](https://github.com/eddelbuettel/rprotobuf)
+[![JSS](https://img.shields.io/badge/JSS-10.18637%2Fjss.v071.i02-brightgreen)](https://doi.org/10.18637/jss.v071.i02)
 
 ### What are Protocol Buffers?
 
@@ -41,15 +43,15 @@ source.
 Under Debian/Ubuntu you may need
 
 ```bash
-sudo apt-get install protobuf-compiler libprotobuf-dev libprotoc-dev 
+sudo apt-get install protobuf-compiler libprotobuf-dev libprotoc-dev
 ```
 
 with similar commands on other operating systems or distributions.
 
 ### Documentation
 
-The package contains two pdf vignettes; the second one corresponds to 
-[our JSS paper](https://www.jstatsoft.org/article/view/v071i02).
+The package contains two pdf vignettes; the second one corresponds to
+[our JSS paper](https://doi.org/10.18637/jss.v071.i02).
 
 ### Authors
 
@@ -58,5 +60,3 @@ Romain Francois, Dirk Eddelbuettel, Murray Stokely and Jeroen Ooms
 ### License
 
 GPL (>= 2)
-
-
