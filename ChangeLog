@@ -1,6 +1,60 @@
+2023-12-13  Dirk Eddelbuettel  <edd@debian.org>
+
+	* DESCRIPTION (Version, Date): Release 0.4.21
+	* configure.ac: Idem
+	* configure: Idem
+
+2023-12-10  Dirk Eddelbuettel  <edd@debian.org>
+
+	* DESCRIPTION (Version, Date): Roll micro version and date
+
+	* R/00classes.R: Tweak .Call() update some more
+	* R/field_count.R: Idem
+	* R/wrapper_ServiceDescriptor.R: Idem
+
+	* README.md: Update / remove stale references to old ProtoBuf doc site
+	* man/ArrayInputStream-class.Rd: Idem
+        * man/ArrayOutputStream-class.Rd: Idem
+        * man/Descriptor-class.Rd: Idem
+        * man/EnumValueDescriptor-class.Rd: Idem
+        * man/FileDescriptor-class.Rd: Idem
+        * man/FileInputStream-class.Rd: Idem
+        * man/FileOutputStream-class.Rd: Idem
+        * man/Message-class.Rd: Idem
+        * man/ZeroCopyInputStream-class.Rd: Idem
+        * man/ZeroCopyOutputStream-class.Rd: Idem
+        * man/swap.Rd: Idem
+        * inst/tinytest/data/encoding.proto: Idem
+        * inst/tinytest/test_serialize.R: Idem
+        * vignettes/rmd/RProtoBuf-intro.Rmd: Idem
+        * vignettes/rmd/RProtoBuf-quickref.Rmd: Idem
+
+2023-12-09  Dirk Eddelbuettel  <edd@debian.org>
+
+	* .github/workflows/alpine.yaml: Add container-based continuous
+	integration test to permit test under newer Protocol Buffers
+
+	* R/*.R: Update numerous .Call() to switch to unquoted expression
+	given symbol registration of the compiled functions
+
+2023-07-12  Matteo Gianella  <matteo.gianella@polimi.it>
+
+	* src/RSourceTree.h: Code update also in case of protobuf version >= 22.x
+	* src/RSourceTree.cpp: Idem
+	* src/wrapper_Descriptor: Idem
+	* src/wrapper_Message: Idem
+
+2023-03-11  Dirk Eddelbuettel  <edd@debian.org>
+
+	* src/Makevars.ucrt (CXX_STD): Also set C++17 here
+
+2022-11-04  Dirk Eddelbuettel  <edd@debian.org>
+
+	* .github/workflows/docker.yaml (jobs): Update different actions
+
 2022-11-02  Dirk Eddelbuettel  <edd@debian.org>
 
-        * DESCRIPTION (Version, Date): New release 0.4.19
+        * DESCRIPTION (Version, Date): New release 0.4.20
 	* configure.ac: Idem
 	* configure: Idem
 
