@@ -1,6 +1,6 @@
 Package: RProtoBuf
-Version: 0.4.21
-Date: 2023-12-13
+Version: 0.4.22
+Date: 2024-01-20
 Author: Romain Francois, Dirk Eddelbuettel, Murray Stokely and Jeroen Ooms
 Maintainer: Dirk Eddelbuettel <edd@debian.org>
 Title: R Interface to the 'Protocol Buffers' 'API' (Version 2 or 3)
@@ -25,6 +25,6 @@ URL: https://github.com/eddelbuettel/rprotobuf,
         https://dirk.eddelbuettel.com/code/rprotobuf.html
 License: GPL (>= 2)
 NeedsCompilation: yes
-Packaged: 2023-12-13 13:18:22 UTC; edd
+Packaged: 2024-01-20 13:44:18 UTC; edd
 Repository: CRAN
-Date/Publication: 2023-12-13 13:50:02 UTC
+Date/Publication: 2024-01-21 13:42:45 UTC

@@ -1,5 +1,5 @@
-52bbc3a34b57ec183c0ec38196bb0ce9 *ChangeLog
-45fe6f644bc909ad4c9ad180f3a43770 *DESCRIPTION
+89e11b2446df7566180740ee264b31d4 *ChangeLog
+01d5c4ee3f042653db89fbac3699fad0 *DESCRIPTION
 62fb696527f6acb69d98f22921ab5ade *NAMESPACE
 e0b7982da61c6cac582d651d0ac52527 *R/00classes.R
 b0bfbaa369be017c205961a53aec8a4b *R/add.R
@@ -42,8 +42,8 @@ ee056c057148096b4b37a94d69470bb8 *R/wrapper_ServiceDescriptor.R
 9c2e29fe733b28fbd0058fe8f82a4c86 *TODO
 ccbed1553451c7d9c56eadef46445408 *build/vignette.rds
 ecc5e657a5356f7305f5e693d252d8a0 *cleanup
-0a88a562955be4d8ab2314595ef65c95 *configure
-a1c92e0d67a224cb2a75f93dd4cef5f5 *configure.ac
+68e19ca71e52b66255948de11a4379f5 *configure
+df2726b9b140a1a7f1ff78f4066eb0b7 *configure.ac
 d41d8cd98f00b204e9800998ecf8427e *configure.win
 38719099f12809ebe19a43b951474c6b *demo/00Index
 6275f697db7b64510f10f6bbc95c0498 *demo/addressbook.R
@@ -52,11 +52,11 @@ d41d8cd98f00b204e9800998ecf8427e *configure.win
 27b7e7162db71cc6496eabe3b51e0b51 *inst/NEWS.Rd
 5485d1d9d1bfb19216aaef28bd8fcc89 *inst/THANKS
 24b19e060fb00703e9eb9605acc5fc83 *inst/doc/RProtoBuf-intro.Rnw
-4d1755eee207755a8626bf3ad8504334 *inst/doc/RProtoBuf-intro.pdf
+8a0cbfcf7630a92a71d4e17030afb300 *inst/doc/RProtoBuf-intro.pdf
 d60d4b6e6889fd2750cf84d26c5df289 *inst/doc/RProtoBuf-paper.Rnw
-70a9258f2ed8e56ea62c0464063ca4d6 *inst/doc/RProtoBuf-paper.pdf
+6527c0e0415d9550cfac156a48f2694a *inst/doc/RProtoBuf-paper.pdf
 81c6d4114d136b4a43668d834a444a8d *inst/doc/RProtoBuf-quickref.Rnw
-3b7f4be27a28ada2df5ddb59350229a8 *inst/doc/RProtoBuf-quickref.pdf
+5b21ce8bcd8f96fba5f952eb7ef4e55b *inst/doc/RProtoBuf-quickref.pdf
 8513688afa8b8be605c63815fe85dead *inst/examples/addressbook.pb
 7f6e97dd4d48fcec1cfd7f9998dc0a62 *inst/opencpu/ocpu-getdata.R
 f16a4dde30d41003822a89fc99c7be66 *inst/opencpu/ocpu-getdata.py
@@ -175,7 +175,7 @@ e9ecde274f161c38541d2e6736a9cd97 *src/ConnectionCopyingOutputStream.cpp
 b8c98bd0c5b4df4708a75c5a6a5c74fa *src/DescriptorPoolLookup.cpp
 4fb28107f0914a1e85d9e75a12832149 *src/DescriptorPoolLookup.h
 7bad2c71289ce6840d839d5d0339b017 *src/Makevars.in
-546ae14bb011a84eb35e73d78cd40c3f *src/Makevars.ucrt
+88e6d5ca0ccf601ba9b520d41fc04da3 *src/Makevars.ucrt
 8b74abcd9f3cbe4214191b642228ec6d *src/Makevars.win
 f0a9025c80ecb4ecd7e78b56970df1a2 *src/RSourceTree.cpp
 ec2c0c626cdb19b9b1b2a3850a46da03 *src/RSourceTree.h
