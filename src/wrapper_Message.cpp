@@ -190,7 +190,7 @@ RPB_FUNCTION_1(Rcpp::List, METHOD(as_list), Rcpp::XPtr<GPB::Message> message) {
     for (int i = 0; i < nf; i++) {
         const GPB::FieldDescriptor* fd = desc->field(i);
         val[i] = getMessageField(message, Rcpp::CharacterVector::create(fd->name()));
-        fieldNames[i] = fd->name();
+        fieldNames[i] = std::string(fd->name());
     }
     val.names() = fieldNames;
     return val;
@@ -430,7 +430,7 @@ RPB_FUNCTION_1(Rcpp::CharacterVector, METHOD(fieldNames), Rcpp::XPtr<GPB::Messag
     int nfields = desc->field_count();
     Rcpp::CharacterVector res(nfields);
     for (int i = 0; i < nfields; i++) {
-        res[i] = desc->field(i)->name();
+        res[i] = std::string(desc->field(i)->name());
     }
     return (res);
 }
@@ -451,7 +451,9 @@ RPB_FUNCTION_3(Rcpp::CharacterVector, METHOD(as_json), Rcpp::XPtr<GPB::Message> 
     GPB::util::JsonPrintOptions opts;
     opts.add_whitespace = true;
     opts.preserve_proto_field_names = preserve_proto_field_names;
-    opts.always_print_primitive_fields = always_print_primitive_fields;
+    #if GOOGLE_PROTOBUF_VERSION < 5026000
+        opts.always_print_primitive_fields = always_print_primitive_fields;
+    #endif
 
     std::string buf;
     #if GOOGLE_PROTOBUF_VERSION < 4022000

@@ -1,3 +1,80 @@
+2025-01-14  Dirk Eddelbuettel  <edd@debian.org>
+
+	* DESCRIPTION (Version, Date): Release 0.4.23
+	* configure.ac: Idem
+	* configure: Idem
+
+	* inst/NEWS.Rd: Update one URL
+
+2025-01-10  Dirk Eddelbuettel  <edd@debian.org>
+
+	* configure.ac: Correct three possible bashisms
+	* configure: Regenerated
+
+2024-11-12  Dirk Eddelbuettel  <edd@debian.org>
+
+	* DESCRIPTION (Version, Date): Roll micro version and date
+
+2024-11-11  Lev Kandel  <lmakhlis@google.com>
+
+	* src/DescriptorPoolLookup.cpp: Compatibility with protobuf >= 6.30.0
+	* src/DescriptorPoolLookup.h: Idem
+	* src/mutators.cpp: Idem
+	* src/rprotobuf.cpp: Idem
+	* src/rprotobuf.h: Idem
+	* src/wrapper_Descriptor.cpp: Idem
+	* src/wrapper_EnumDescriptor.cpp: Idem
+	* src/wrapper_EnumValueDescriptor.cpp: Idem
+	* src/wrapper_FieldDescriptor.cpp: Idem
+	* src/wrapper_FileDescriptor.cpp: Idem
+	* src/wrapper_Message.cpp: Idem
+	* src/wrapper_MethodDescriptor.cpp: Idem
+	* src/wrapper_ServiceDescriptor.cpp: Idem
+
+2024-11-07  Dirk Eddelbuettel  <edd@debian.org>
+
+	* DESCRIPTION (Authors@R): Added
+
+2024-07-03  Dirk Eddelbuettel  <edd@debian.org>
+
+	* DESCRIPTION (Version, Date): Roll micro version and date
+
+2024-07-02  Matteo Gianella  <matteo.gianella@polimi.it>
+
+	* src/RWarningErrorCollector.h: Code update also in case of protobuf
+	version >= 26.x
+	* src/RWarningErrorCollector.cpp: Idem
+	* src/wrapper_Message: Idem
+
+2024-05-29  Dirk Eddelbuettel  <edd@debian.org>
+
+	* DESCRIPTION (Version, Date): Roll micro version and date
+
+2024-05-28  Michael Chirico  <chiricom@google.com>
+
+	* R/extensions.R: Build error strings with stop(), avoiding paste()
+	* src/init.c: Remove placeholders for unimplemented methods
+	* R/00classes.R: Idem
+	* R/field_count.R: Idem
+	* R/wrapper_ServiceDescriptor.R: Idem
+
+2024-05-24  Dirk Eddelbuettel  <edd@debian.org>
+
+	* README.md: Use tinyverse.netlify.app for dependency badge
+
+2024-04-23  Dirk Eddelbuettel  <edd@debian.org>
+
+	* .github/workflows/ci.yaml (jobs): Update to actions/checkout@v4,
+	add r-ci-setup actions
+
+2024-03-20  Dirk Eddelbuettel  <edd@debian.org>
+
+	* DESCRIPTION (Version, Date): Roll micro version and date
+
+2024-03-20  Xufei Tan  <xufei@google.com>
+
+	* inst/tinytest/test_addressbook.R: use `toTextFormat()` in tests
+
 2024-01-20  Dirk Eddelbuettel  <edd@debian.org>
 
 	* DESCRIPTION (Version, Date): Release 0.4.22
