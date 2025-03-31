@@ -1,3 +1,22 @@
+2025-03-31  Dirk Eddelbuettel  <edd@debian.org>
+
+	* DESCRIPTION (Version, Date): Release 0.4.24
+	* configure.ac: Idem
+	* configure: Idem
+
+	* src/init.c: Set EnumValueDescriptor_name declaration to two args
+
+2025-03-16  Dirk Eddelbuettel  <edd@debian.org>
+
+	* src/rprotobuf.h: Replace EXTPTR_PTR with R_ExternalPtrAddr
+	* src/rprotobuf.cpp: Idem
+	* src/mutators.cpp: Idem
+
+2025-02-10  Mike Kruskal  <mkruskal@google.com>
+
+	* R/00classes.R: Point to EnumValueDescriptor
+	* src/init.c: Add bindings for EnumValueDescriptor::name
+
 2025-01-14  Dirk Eddelbuettel  <edd@debian.org>
 
 	* DESCRIPTION (Version, Date): Release 0.4.23
