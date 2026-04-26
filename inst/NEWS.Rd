@@ -3,13 +3,20 @@
 \newcommand{\ghpr}{\href{https://github.com/eddelbuettel/rprotobuf/pull/#1}{##1}}
 \newcommand{\ghit}{\href{https://github.com/eddelbuettel/rprotobuf/issues/#1}{##1}}
 
+\section{Changes in RProtoBuf version 0.4.27 (2026-04-26)}{
+  \itemize{
+    \item Adjust to \code{FieldDescriptor} API changes in ProtoBuf 3.4 (Luca
+    Billi in \ghpr{114} fixing \ghit{113})
+  }
+}
+
 \section{Changes in RProtoBuf version 0.4.26 (2026-03-06)}{
   \itemize{
     \item Minor cleanup in DESCRIPTION depends and imports
     \item Remove obsolete check for \code{utils::.DollarNames} (Michael
     Chirico in \ghpr{111})
     \item Replace \code{Rf_error} with \code{Rcpp::stop}, turn remaining one
-    into \code{(Rf_error)} (Dirk in \code{112})
+    into \code{(Rf_error)} (Dirk in \ghpr{112})
     \item Update \code{configure} test to check for RProtoBuf 3.3.0 or later
   }
 }
